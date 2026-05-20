@@ -1,0 +1,3496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="健康管家">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>健康管家 - 每日提醒</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #f093fb;
+            --accent-1: #FF6B6B;
+            --accent-2: #4ECDC4;
+            --accent-3: #FFE66D;
+            --accent-4: #A78BFA;
+            --accent-5: #81C784;
+            --accent-6: #FF8E53;
+            --accent-7: #64B5F6;
+            --accent-8: #F06292;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --white: #FFFFFF;
+            --bg-dark: #1a1a2e;
+            --bg-gradient-1: #1a1a2e;
+            --bg-gradient-2: #16213e;
+            --bg-gradient-3: #0f3460;
+        }
+
+        /* 主题风格 */
+        .theme-sakura {
+            --primary: #ff6b9d;
+            --primary-dark: #e91e63;
+            --secondary: #ffc1e3;
+            --bg-dark: #fff0f5;
+            --bg-gradient-1: #fff0f5;
+            --bg-gradient-2: #ffe4ec;
+            --bg-gradient-3: #ffd6e7;
+        }
+
+        .theme-ocean {
+            --primary: #00bcd4;
+            --primary-dark: #0097a7;
+            --secondary: #80deea;
+            --bg-dark: #e0f7fa;
+            --bg-gradient-1: #e0f7fa;
+            --bg-gradient-2: #b2ebf2;
+            --bg-gradient-3: #80deea;
+        }
+
+        .theme-forest {
+            --primary: #4caf50;
+            --primary-dark: #388e3c;
+            --secondary: #a5d6a7;
+            --bg-dark: #e8f5e9;
+            --bg-gradient-1: #e8f5e9;
+            --bg-gradient-2: #c8e6c9;
+            --bg-gradient-3: #a5d6a7;
+        }
+
+        .theme-sunset {
+            --primary: #ff9800;
+            --primary-dark: #f57c00;
+            --secondary: #ffcc80;
+            --bg-dark: #fff3e0;
+            --bg-gradient-1: #fff3e0;
+            --bg-gradient-2: #ffe0b2;
+            --bg-gradient-3: #ffcc80;
+        }
+
+        .theme-midnight {
+            --primary: #7c4dff;
+            --primary-dark: #651fff;
+            --secondary: #b388ff;
+            --bg-dark: #1a1a2e;
+            --bg-gradient-1: #1a1a2e;
+            --bg-gradient-2: #16213e;
+            --bg-gradient-3: #0f3460;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background 0.5s ease;
+        }
+
+        .bg-animation {
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 50%, var(--bg-gradient-3) 100%) !important;
+        }
+
+
+
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 复杂动态背景 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 50%, var(--bg-gradient-3) 100%);
+            transition: background 0.5s ease;
+        }
+
+        /* 星空效果 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* 浮动几何图形 */
+        .geometric-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .geo-shape {
+            position: absolute;
+            opacity: 0.08;
+            animation: float-geo 25s infinite ease-in-out;
+        }
+
+        .geo-shape.circle {
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+        }
+
+        .geo-shape.triangle {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 70px solid var(--accent-2);
+        }
+
+        .geo-shape.square {
+            border: 3px solid var(--accent-3);
+            transform: rotate(45deg);
+        }
+
+        .geo-shape.hexagon {
+            width: 60px;
+            height: 34px;
+            background: var(--accent-4);
+            position: relative;
+        }
+
+        .geo-shape.hexagon:before,
+        .geo-shape.hexagon:after {
+            content: "";
+            position: absolute;
+            width: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+        }
+
+        .geo-shape.hexagon:before {
+            bottom: 100%;
+            border-bottom: 17px solid var(--accent-4);
+        }
+
+        .geo-shape.hexagon:after {
+            top: 100%;
+            border-top: 17px solid var(--accent-4);
+        }
+
+        @keyframes float-geo {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -40px) rotate(90deg); }
+            50% { transform: translate(-20px, 20px) rotate(180deg); }
+            75% { transform: translate(40px, 30px) rotate(270deg); }
+        }
+
+        /* 页面通用 */
+        .page {
+            display: none;
+            padding: 0 16px 100px;
+            animation: pageEnter 0.4s ease-out;
+            min-height: 100vh;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .top-bar h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        /* 日期卡片 - 复杂图案 */
+        .date-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(240, 147, 251, 0.9));
+            border-radius: 24px;
+            padding: 28px;
+            margin: 16px 0;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .date-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.5;
+        }
+
+        .date-card .day {
+            font-size: 56px;
+            font-weight: 900;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .date-card .weekday {
+            font-size: 18px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .date-card .lunar {
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+        }
+
+        .date-card .progress-ring {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: rgba(255,255,255,0.2);
+            stroke-width: 4;
+        }
+
+        .progress-ring-progress {
+            fill: none;
+            stroke: white;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* 任务卡片 - 复杂图案 */
+        .task-section {
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .task-card:active {
+            transform: scale(0.98);
+        }
+
+        .task-card.deleting {
+            animation: shake 0.4s ease-in-out;
+            border: 2px solid #FF6B6B;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .delete-hint {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 11px;
+            color: #FF6B6B;
+            background: rgba(255,107,107,0.1);
+            padding: 2px 8px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .task-card.show-hint .delete-hint {
+            opacity: 1;
+        }
+
+        .task-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--card-color-1), var(--card-color-2));
+        }
+
+        .task-card::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+            opacity: 0.1;
+            border-radius: 50%;
+            filter: blur(20px);
+        }
+
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .task-illustration {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .task-illustration .pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.2;
+            background-image: 
+                radial-gradient(circle at 30% 30%, white 2px, transparent 2px),
+                radial-gradient(circle at 70% 70%, white 2px, transparent 2px);
+            background-size: 20px 20px;
+        }
+
+        .task-illustration .pulse-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.4);
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        .task-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+
+        .task-info .time {
+            font-size: 14px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge.pending {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .status-badge.completed {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .complete-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 3px solid #E0E0E0;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .complete-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .complete-btn.completed {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            border-color: transparent;
+            animation: completePop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes completePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .complete-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: #BDBDBD;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: all 0.3s ease;
+        }
+
+        .complete-btn.completed svg {
+            stroke: white;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: drawCheck 0.4s ease forwards;
+        }
+
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* 统计网格 */
+        .stats-section {
+            margin-top: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* 历史记录 */
+        .history-section {
+            margin-top: 24px;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+        }
+
+        .history-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .history-day {
+            min-width: 64px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        .history-day .day-name {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .history-day .day-num {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .history-day .weather {
+            font-size: 16px;
+            margin-bottom: 6px;
+            line-height: 1;
+        }
+
+        .history-day .icons {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .history-day .icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            opacity: 0.2;
+            transition: all 0.3s ease;
+        }
+
+        .history-day .icon.done {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* 设置页面 */
+        .settings-group {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .settings-group h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+
+        .setting-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .time-input {
+            padding: 10px 14px;
+            border: 2px solid #E0E0E0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .toggle {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: #E0E0E0;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .toggle-knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .toggle.active .toggle-knob {
+            transform: translateX(24px);
+        }
+
+        /* 铃声选择 */
+        .ringtone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ringtone-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ringtone-item:hover {
+            background: #e9ecef;
+        }
+
+        .ringtone-item.selected {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.1));
+            border: 2px solid var(--primary);
+        }
+
+        .ringtone-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ringtone-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .ringtone-name {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 上传区域 */
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area .upload-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .upload-area p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* 音量控制 */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0 24px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item .nav-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover .nav-icon {
+            transform: translateY(-2px);
+        }
+
+        .nav-item .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* FAB按钮 */
+        .fab {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        /* 提醒弹窗 */
+        .reminder-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .reminder-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .reminder-content {
+            background: white;
+            border-radius: 28px;
+            padding: 40px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reminder-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .reminder-illustration {
+            font-size: 72px;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .reminder-content h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .reminder-content p {
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        .reminder-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* 彩纸效果 */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall 2s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.5); }
+        }
+
+        /* 动画 */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* 侧边栏菜单 */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            z-index: 1001;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.2);
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            padding: 40px 24px 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .sidebar-username {
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-level {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+        }
+
+        .sidebar-menu {
+            padding: 16px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 16px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(4px);
+        }
+
+        .sidebar-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .sidebar-item-text {
+            flex: 1;
+        }
+
+        .sidebar-item-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .sidebar-item-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .sidebar-item-arrow {
+            font-size: 20px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 16px;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+        }
+
+        /* 添加任务页面 */
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .icon-select-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.1);
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-select-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .icon-select-btn.selected {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        /* 响应式 */
+        @media (min-width: 481px) {
+            .app-container {
+                max-width: 480px;
+                margin: 0 auto;
+            }
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* 活动类型标签 */
+        .activity-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .activity-tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .activity-tag:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .activity-tag.selected {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-color: transparent;
+        }
+
+        /* 主题选择器 */
+        .theme-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .theme-option {
+            padding: 16px 8px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .theme-option:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-option.selected {
+            border-color: var(--primary);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .theme-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .theme-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* 图标自定义 */
+        .icon-customizer {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 16px;
+        }
+
+        .icon-option {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .icon-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .icon-option.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(240,147,251,0.1));
+        }
+
+        /* 成就系统 */
+        .achievements-section {
+            margin-top: 24px;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .achievement-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 16px 8px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+            filter: grayscale(0.8);
+        }
+
+        .achievement-card.locked .achievement-medal {
+            filter: grayscale(1);
+        }
+
+        .achievement-card.unlocked {
+            animation: achievementUnlock 0.6s ease;
+        }
+
+        @keyframes achievementUnlock {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .achievement-medal {
+            font-size: 36px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .achievement-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .achievement-desc {
+            font-size: 10px;
+            color: var(--text-light);
+        }
+
+        .achievement-progress {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .achievement-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .achievement-progress-text {
+            font-size: 10px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* 成就弹窗 */
+        .achievement-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .achievement-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .achievement-content {
+            background: white;
+            border-radius: 28px;
+            padding: 40px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: slideUp 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
+            animation: glowPulse 2s infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        .achievement-icon {
+            font-size: 80px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+            animation: bounce 1s infinite;
+        }
+
+        .achievement-content h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .achievement-content p {
+            color: var(--text-light);
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .achievement-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+        }
+
+        /* 奖章页面 */
+        .badges-section {
+            margin-top: 20px;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .badge-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .badge-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .badge-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .badge-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .badge-desc {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .badge-date {
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="stars" id="stars"></div>
+    <div class="geometric-shapes" id="geo-shapes"></div>
+
+    <!-- 侧边栏 -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-avatar">🧘</div>
+            <div class="sidebar-username">健康达人</div>
+            <div class="sidebar-level" id="sidebar-level">Lv.1 健康新手</div>
+        </div>
+        
+        <div class="sidebar-menu">
+            <div class="sidebar-item" id="sidebar-profile">
+                <div class="sidebar-item-icon">👤</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">个人资料</div>
+                    <div class="sidebar-item-desc">查看和编辑个人信息</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+            
+            <div class="sidebar-item" id="sidebar-stats">
+                <div class="sidebar-item-icon">📊</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">数据统计</div>
+                    <div class="sidebar-item-desc">查看详细健康数据</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+            
+            <div class="sidebar-item" id="sidebar-achievements">
+                <div class="sidebar-item-icon">🏆</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">我的成就</div>
+                    <div class="sidebar-item-desc">查看已获得的奖章</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+
+            <div class="sidebar-item" id="sidebar-pet">
+                <div class="sidebar-item-icon">🐾</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">萌宠养成</div>
+                    <div class="sidebar-item-desc">照顾你的宠物伙伴</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-item" id="sidebar-theme">
+                <div class="sidebar-item-icon">🎨</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">主题风格</div>
+                    <div class="sidebar-item-desc">切换页面主题颜色</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+            
+            <div class="sidebar-item" id="sidebar-sound">
+                <div class="sidebar-item-icon">🔔</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">提醒设置</div>
+                    <div class="sidebar-item-desc">管理提醒时间和铃声</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+            
+            <div class="sidebar-item" id="sidebar-export">
+                <div class="sidebar-item-icon">📤</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">数据导出</div>
+                    <div class="sidebar-item-desc">导出健康数据记录</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-item" id="sidebar-help">
+                <div class="sidebar-item-icon">❓</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">使用帮助</div>
+                    <div class="sidebar-item-desc">查看使用指南</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+            
+            <div class="sidebar-item" id="sidebar-about">
+                <div class="sidebar-item-icon">ℹ️</div>
+                <div class="sidebar-item-text">
+                    <div class="sidebar-item-title">关于我们</div>
+                    <div class="sidebar-item-desc">应用信息和版本</div>
+                </div>
+                <div class="sidebar-item-arrow">→</div>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            健康管家 v1.0<br>
+            让健康成为一种习惯
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- 首页 -->
+        <div id="home-page" class="page active">
+            <div class="top-bar">
+                <button class="icon-btn" id="menu-btn">☰</button>
+                <h1>健康管家</h1>
+                <button class="icon-btn" id="notif-btn">🔔</button>
+            </div>
+
+            <div class="date-card">
+                <div class="day" id="current-day">21</div>
+                <div class="weekday" id="current-weekday">星期三</div>
+                <div class="lunar" id="current-lunar">农历四月初四</div>
+                <div class="progress-ring">
+                    <svg width="60" height="60" viewBox="0 0 60 60">
+                        <circle class="progress-ring-circle" cx="30" cy="30" r="26"></circle>
+                        <circle class="progress-ring-progress" id="progress-circle" cx="30" cy="30" r="26" 
+                            stroke-dasharray="163.36" stroke-dashoffset="163.36"></circle>
+                    </svg>
+                    <div class="progress-text" id="progress-text">0%</div>
+                </div>
+            </div>
+
+            <div class="task-section" id="task-list"></div>
+
+            <div class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="number" id="streak-count">0</div>
+                        <div class="label">连续打卡</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="total-count">0</div>
+                        <div class="label">累计完成</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="section-title">
+                    <span>📊</span>
+                    最近7天
+                </div>
+                <div class="history-scroll" id="history-grid"></div>
+            </div>
+
+            <div class="achievements-section">
+                <div class="section-title">
+                    <span>🏆</span>
+                    我的成就
+                </div>
+                <div class="achievements-grid" id="achievements-grid"></div>
+            </div>
+
+            <div class="achievements-section" id="pet-section" style="display: none;">
+                <div class="section-title">
+                    <span>🐾</span>
+                    我的萌宠
+                </div>
+                <div class="pet-card" id="pet-card" onclick="window.location.href='pet.html'" style="background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border-radius: 20px; padding: 20px; margin: 0 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">
+                    <div id="home-pet-emoji" style="font-size: 56px;">🐕</div>
+                    <div style="flex: 1;">
+                        <div id="home-pet-name" style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">旺财</div>
+                        <div id="home-pet-status" style="font-size: 13px; opacity: 0.8;">饱食度 80% · 心情 80%</div>
+                    </div>
+                    <div style="font-size: 20px; opacity: 0.5;">→</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置页面 -->
+        <div id="settings-page" class="page">
+            <div class="top-bar">
+                <button class="icon-btn" id="back-btn">←</button>
+                <h1>提醒设置</h1>
+                <div style="width: 40px;"></div>
+            </div>
+
+            <div id="task-settings-list"></div>
+
+            <div class="settings-group">
+                <h3><span>🎵</span> 铃声设置</h3>
+                <div class="ringtone-list" id="ringtone-list">
+                    <div class="ringtone-item selected" data-ringtone="default">
+                        <div class="ringtone-info">
+                            <div class="ringtone-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">🎵</div>
+                            <div class="ringtone-name">默认铃声</div>
+                        </div>
+                        <button class="play-btn" data-ringtone="default">▶</button>
+                    </div>
+                    <div class="ringtone-item" data-ringtone="gentle">
+                        <div class="ringtone-info">
+                            <div class="ringtone-icon" style="background: linear-gradient(135deg, #4ECDC4, #44A08D);">🎶</div>
+                            <div class="ringtone-name">轻柔音乐</div>
+                        </div>
+                        <button class="play-btn" data-ringtone="gentle">▶</button>
+                    </div>
+                    <div class="ringtone-item" data-ringtone="energetic">
+                        <div class="ringtone-info">
+                            <div class="ringtone-icon" style="background: linear-gradient(135deg, #FFE66D, #FFA726);">🎸</div>
+                            <div class="ringtone-name">活力节拍</div>
+                        </div>
+                        <button class="play-btn" data-ringtone="energetic">▶</button>
+                    </div>
+                    <div class="ringtone-item" data-ringtone="nature">
+                        <div class="ringtone-info">
+                            <div class="ringtone-icon" style="background: linear-gradient(135deg, #81C784, #4CAF50);">🌿</div>
+                            <div class="ringtone-name">自然之声</div>
+                        </div>
+                        <button class="play-btn" data-ringtone="nature">▶</button>
+                    </div>
+                </div>
+                <div class="upload-area" id="upload-ringtone">
+                    <div class="upload-icon">📁</div>
+                    <p>点击上传自定义铃声</p>
+                    <p style="font-size: 12px; margin-top: 4px;">支持 MP3, WAV 格式</p>
+                </div>
+                <input type="file" id="ringtone-file" accept="audio/*">
+
+                <div class="volume-control">
+                    <span>🔊</span>
+                    <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="80">
+                    <span id="volume-value">80%</span>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3><span>🎨</span> 页面风格</h3>
+                <div class="theme-selector" id="theme-selector">
+                    <div class="theme-option selected" data-theme="theme-midnight">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">🌙</div>
+                        <div class="theme-name">午夜</div>
+                    </div>
+                    <div class="theme-option" data-theme="theme-sakura">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, #fff0f5, #ffc1e3);">🌸</div>
+                        <div class="theme-name">樱花</div>
+                    </div>
+                    <div class="theme-option" data-theme="theme-ocean">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, #e0f7fa, #80deea);">🌊</div>
+                        <div class="theme-name">海洋</div>
+                    </div>
+                    <div class="theme-option" data-theme="theme-forest">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, #e8f5e9, #a5d6a7);">🌲</div>
+                        <div class="theme-name">森林</div>
+                    </div>
+                    <div class="theme-option" data-theme="theme-sunset">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, #fff3e0, #ffcc80);">🌅</div>
+                        <div class="theme-name">日落</div>
+                    </div>
+                    <div class="theme-option" data-theme="">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, #f5f5f5, #e0e0e0);">⚪</div>
+                        <div class="theme-name">简约</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3><span>🔔</span> 通知权限</h3>
+                <button class="btn btn-primary" id="request-notif-btn" style="width: 100%;">
+                    开启浏览器通知
+                </button>
+            </div>
+        </div>
+
+        <!-- 添加任务页面 -->
+        <div id="add-task-page" class="page">
+            <div class="top-bar">
+                <button class="icon-btn" id="back-btn-add">←</button>
+                <h1>添加健康活动</h1>
+                <div style="width: 40px;"></div>
+            </div>
+
+            <div class="settings-group">
+                <h3><span>🏷️</span> 选择活动类型</h3>
+                <div class="activity-types" id="activity-types">
+                    <div class="activity-tag selected" data-type="exercise" data-icon="🏃" data-color="1">🏃 运动健身</div>
+                    <div class="activity-tag" data-type="foot-soak" data-icon="🦶" data-color="2">🦶 泡脚养生</div>
+                    <div class="activity-tag" data-type="water" data-icon="💧" data-color="3">💧 喝水提醒</div>
+                    <div class="activity-tag" data-type="meditation" data-icon="🧘" data-color="4">🧘 冥想放松</div>
+                    <div class="activity-tag" data-type="diet" data-icon="🥗" data-color="5">🥗 健康饮食</div>
+                    <div class="activity-tag" data-type="reading" data-icon="📚" data-color="6">📚 阅读学习</div>
+                    <div class="activity-tag" data-type="sleep" data-icon="😴" data-color="7">😴 规律睡眠</div>
+                    <div class="activity-tag" data-type="stretch" data-icon="🤸" data-color="8">🤸 拉伸运动</div>
+                    <div class="activity-tag" data-type="eye" data-icon="👁️" data-color="1">👁️ 眼保健操</div>
+                    <div class="activity-tag" data-type="posture" data-icon="🪑" data-color="2">🪑 坐姿提醒</div>
+                    <div class="activity-tag" data-type="vitamin" data-icon="💊" data-color="3">💊 服用维生素</div>
+                    <div class="activity-tag" data-type="walk" data-icon="🚶" data-color="4">🚶 散步活动</div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-icon" style="background: rgba(102,126,234,0.15);">✏️</div>
+                        自定义名称
+                    </div>
+                </div>
+                <input type="text" class="time-input" id="new-task-name" placeholder="例如：晨跑、瑜伽..." style="width: 100%; margin-top: 8px;">
+            </div>
+
+            <div class="settings-group">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-icon" style="background: rgba(102,126,234,0.15);">⏰</div>
+                        提醒时间
+                    </div>
+                    <input type="time" class="time-input" id="new-task-time" value="12:00">
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3><span>🎨</span> 自定义图标</h3>
+                <div class="icon-customizer" id="icon-customizer">
+                    <div class="icon-option selected" data-icon="🏃">🏃</div>
+                    <div class="icon-option" data-icon="🦶">🦶</div>
+                    <div class="icon-option" data-icon="💧">💧</div>
+                    <div class="icon-option" data-icon="🧘">🧘</div>
+                    <div class="icon-option" data-icon="🥗">🥗</div>
+                    <div class="icon-option" data-icon="📚">📚</div>
+                    <div class="icon-option" data-icon="😴">😴</div>
+                    <div class="icon-option" data-icon="🤸">🤸</div>
+                    <div class="icon-option" data-icon="👁️">👁️</div>
+                    <div class="icon-option" data-icon="🪑">🪑</div>
+                    <div class="icon-option" data-icon="💊">💊</div>
+                    <div class="icon-option" data-icon="🚶">🚶</div>
+                    <div class="icon-option" data-icon="🏋️">🏋️</div>
+                    <div class="icon-option" data-icon="🚴">🚴</div>
+                    <div class="icon-option" data-icon="🏊">🏊</div>
+                    <div class="icon-option" data-icon="🧗">🧗</div>
+                    <div class="icon-option" data-icon="🤾">🤾</div>
+                    <div class="icon-option" data-icon="⛹️">⛹️</div>
+                    <div class="icon-option" data-icon="🧑‍⚕️">🧑‍⚕️</div>
+                    <div class="icon-option" data-icon="🌞">🌞</div>
+                    <div class="icon-option" data-icon="🌙">🌙</div>
+                    <div class="icon-option" data-icon="⭐">⭐</div>
+                    <div class="icon-option" data-icon="🔥">🔥</div>
+                    <div class="icon-option" data-icon="💪">💪</div>
+                    <div class="icon-option" data-icon="❤️">❤️</div>
+                    <div class="icon-option" data-icon="🎯">🎯</div>
+                    <div class="icon-option" data-icon="🎖️">🎖️</div>
+                    <div class="icon-option" data-icon="🏅">🏅</div>
+                    <div class="icon-option" data-icon="🥇">🥇</div>
+                    <div class="icon-option" data-icon="🥈">🥈</div>
+                    <div class="icon-option" data-icon="🥉">🥉</div>
+                    <div class="icon-option" data-icon="🎗️">🎗️</div>
+                    <div class="icon-option" data-icon="🎁">🎁</div>
+                    <div class="icon-option" data-icon="🎉">🎉</div>
+                    <div class="icon-option" data-icon="✨">✨</div>
+                    <div class="icon-option" data-icon="🌈">🌈</div>
+                    <div class="icon-option" data-icon="🌺">🌺</div>
+                    <div class="icon-option" data-icon="🌻">🌻</div>
+                    <div class="icon-option" data-icon="🌿">🌿</div>
+                    <div class="icon-option" data-icon="🍀">🍀</div>
+                    <div class="icon-option" data-icon="🌸">🌸</div>
+                    <div class="icon-option" data-icon="🌷">🌷</div>
+                    <div class="icon-option" data-icon="🌹">🌹</div>
+                    <div class="icon-option" data-icon="🌲">🌲</div>
+                    <div class="icon-option" data-icon="🌳">🌳</div>
+                    <div class="icon-option" data-icon="🌴">🌴</div>
+                    <div class="icon-option" data-icon="🌵">🌵</div>
+                    <div class="icon-option" data-icon="🍄">🍄</div>
+                    <div class="icon-option" data-icon="🌰">🌰</div>
+                    <div class="icon-option" data-icon="🌾">🌾</div>
+                    <div class="icon-option" data-icon="🌊">🌊</div>
+                    <div class="icon-option" data-icon="🔥">🔥</div>
+                    <div class="icon-option" data-icon="⚡">⚡</div>
+                    <div class="icon-option" data-icon="❄️">❄️</div>
+                    <div class="icon-option" data-icon="🌪️">🌪️</div>
+                    <div class="icon-option" data-icon="🌈">🌈</div>
+                    <div class="icon-option" data-icon="☀️">☀️</div>
+                    <div class="icon-option" data-icon="🌤️">🌤️</div>
+                    <div class="icon-option" data-icon="⛅">⛅</div>
+                    <div class="icon-option" data-icon="🌧️">🌧️</div>
+                    <div class="icon-option" data-icon="⛈️">⛈️</div>
+                    <div class="icon-option" data-icon="🌩️">🌩️</div>
+                    <div class="icon-option" data-icon="🌨️">🌨️</div>
+                    <div class="icon-option" data-icon="☁️">☁️</div>
+                    <div class="icon-option" data-icon="🌫️">🌫️</div>
+                    <div class="icon-option" data-icon="🌬️">🌬️</div>
+                    <div class="icon-option" data-icon="🌀">🌀</div>
+                    <div class="icon-option" data-icon="🌡️">🌡️</div>
+                    <div class="icon-option" data-icon="🕐">🕐</div>
+                    <div class="icon-option" data-icon="⏰">⏰</div>
+                    <div class="icon-option" data-icon="⏳">⏳</div>
+                    <div class="icon-option" data-icon="⌛">⌛</div>
+                    <div class="icon-option" data-icon="🎵">🎵</div>
+                    <div class="icon-option" data-icon="🎶">🎶</div>
+                    <div class="icon-option" data-icon="🎼">🎼</div>
+                    <div class="icon-option" data-icon="🎤">🎤</div>
+                    <div class="icon-option" data-icon="🎧">🎧</div>
+                    <div class="icon-option" data-icon="🎷">🎷</div>
+                    <div class="icon-option" data-icon="🎸">🎸</div>
+                    <div class="icon-option" data-icon="🎹">🎹</div>
+                    <div class="icon-option" data-icon="🎺">🎺</div>
+                    <div class="icon-option" data-icon="🎻">🎻</div>
+                    <div class="icon-option" data-icon="🥁">🥁</div>
+                    <div class="icon-option" data-icon="🎬">🎬</div>
+                    <div class="icon-option" data-icon="🎮">🎮</div>
+                    <div class="icon-option" data-icon="🎲">🎲</div>
+                    <div class="icon-option" data-icon="🎯">🎯</div>
+                    <div class="icon-option" data-icon="🎳">🎳</div>
+                    <div class="icon-option" data-icon="🎰">🎰</div>
+                    <div class="icon-option" data-icon="🎱">🎱</div>
+                    <div class="icon-option" data-icon="🎨">🎨</div>
+                    <div class="icon-option" data-icon="🎭">🎭</div>
+                    <div class="icon-option" data-icon="🎪">🎪</div>
+                    <div class="icon-option" data-icon="🎫">🎫</div>
+                    <div class="icon-option" data-icon="🎟️">🎟️</div>
+                    <div class="icon-option" data-icon="🎗️">🎗️</div>
+                    <div class="icon-option" data-icon="🎖️">🎖️</div>
+                    <div class="icon-option" data-icon="🏆">🏆</div>
+                    <div class="icon-option" data-icon="🏅">🏅</div>
+                    <div class="icon-option" data-icon="🥇">🥇</div>
+                    <div class="icon-option" data-icon="🥈">🥈</div>
+                    <div class="icon-option" data-icon="🥉">🥉</div>
+                    <div class="icon-option" data-icon="⚽">⚽</div>
+                    <div class="icon-option" data-icon="🏀">🏀</div>
+                    <div class="icon-option" data-icon="🏈">🏈</div>
+                    <div class="icon-option" data-icon="⚾">⚾</div>
+                    <div class="icon-option" data-icon="🥎">🥎</div>
+                    <div class="icon-option" data-icon="🎾">🎾</div>
+                    <div class="icon-option" data-icon="🏐">🏐</div>
+                    <div class="icon-option" data-icon="🏉">🏉</div>
+                    <div class="icon-option" data-icon="🥏">🥏</div>
+                    <div class="icon-option" data-icon="🎱">🎱</div>
+                    <div class="icon-option" data-icon="🪀">🪀</div>
+                    <div class="icon-option" data-icon="🏓">🏓</div>
+                    <div class="icon-option" data-icon="🏸">🏸</div>
+                    <div class="icon-option" data-icon="🏒">🏒</div>
+                    <div class="icon-option" data-icon="🏑">🏑</div>
+                    <div class="icon-option" data-icon="🥍">🥍</div>
+                    <div class="icon-option" data-icon="🏏">🏏</div>
+                    <div class="icon-option" data-icon="🥅">🥅</div>
+                    <div class="icon-option" data-icon="⛳">⛳</div>
+                    <div class="icon-option" data-icon="🪁">🪁</div>
+                    <div class="icon-option" data-icon="🏹">🏹</div>
+                    <div class="icon-option" data-icon="🎣">🎣</div>
+                    <div class="icon-option" data-icon="🤿">🤿</div>
+                    <div class="icon-option" data-icon="🥊">🥊</div>
+                    <div class="icon-option" data-icon="🥋">🥋</div>
+                    <div class="icon-option" data-icon="🎽">🎽</div>
+                    <div class="icon-option" data-icon="🛹">🛹</div>
+                    <div class="icon-option" data-icon="🛼">🛼</div>
+                    <div class="icon-option" data-icon="🛷">🛷</div>
+                    <div class="icon-option" data-icon="⛸️">⛸️</div>
+                    <div class="icon-option" data-icon="🥌">🥌</div>
+                    <div class="icon-option" data-icon="🎿">🎿</div>
+                    <div class="icon-option" data-icon="⛷️">⛷️</div>
+                    <div class="icon-option" data-icon="🏂">🏂</div>
+                    <div class="icon-option" data-icon="🪂">🪂</div>
+                    <div class="icon-option" data-icon="🏋️">🏋️</div>
+                    <div class="icon-option" data-icon="🤼">🤼</div>
+                    <div class="icon-option" data-icon="🤽">🤽</div>
+                    <div class="icon-option" data-icon="🤾">🤾</div>
+                    <div class="icon-option" data-icon="🌰">🌰</div>
+                    <div class="icon-option" data-icon="🌾">🌾</div>
+                    <div class="icon-option" data-icon="🌿">🌿</div>
+                    <div class="icon-option" data-icon="☘️">☘️</div>
+                    <div class="icon-option" data-icon="🍀">🍀</div>
+                    <div class="icon-option" data-icon="🍁">🍁</div>
+                    <div class="icon-option" data-icon="🍂">🍂</div>
+                    <div class="icon-option" data-icon="🍃">🍃</div>
+                    <div class="icon-option" data-icon="🍄">🍄</div>
+                    <div class="icon-option" data-icon="🌹">🌹</div>
+                    <div class="icon-option" data-icon="🌺">🌺</div>
+                    <div class="icon-option" data-icon="🌻">🌻</div>
+                    <div class="icon-option" data-icon="🌼">🌼</div>
+                    <div class="icon-option" data-icon="🌷">🌷</div>
+                    <div class="icon-option" data-icon="🌸">🌸</div>
+                    <div class="icon-option" data-icon="💐">💐</div>
+                    <div class="icon-option" data-icon="🌲">🌲</div>
+                    <div class="icon-option" data-icon="🌳">🌳</div>
+                    <div class="icon-option" data-icon="🌴">🌴</div>
+                    <div class="icon-option" data-icon="🌵">🌵</div>
+                    <div class="icon-option" data-icon="🌾">🌾</div>
+                    <div class="icon-option" data-icon="🌿">🌿</div>
+                    <div class="icon-option" data-icon="☘️">☘️</div>
+                    <div class="icon-option" data-icon="🍀">🍀</div>
+                    <div class="icon-option" data-icon="🍁">🍁</div>
+                    <div class="icon-option" data-icon="🍂">🍂</div>
+                    <div class="icon-option" data-icon="🍃">🍃</div>
+                    <div class="icon-option" data-icon="🍄">🍄</div>
+                    <div class="icon-option" data-icon="🌰">🌰</div>
+                    <div class="icon-option" data-icon="🦀">🦀</div>
+                    <div class="icon-option" data-icon="🦞">🦞</div>
+                    <div class="icon-option" data-icon="🦐">🦐</div>
+                    <div class="icon-option" data-icon="🦑">🦑</div>
+                    <div class="icon-option" data-icon="🐙">🐙</div>
+                    <div class="icon-option" data-icon="🦪">🦪</div>
+                    <div class="icon-option" data-icon="🐡">🐡</div>
+                    <div class="icon-option" data-icon="🐠">🐠</div>
+                    <div class="icon-option" data-icon="🐟">🐟</div>
+                    <div class="icon-option" data-icon="🐬">🐬</div>
+                    <div class="icon-option" data-icon="🐳">🐳</div>
+                    <div class="icon-option" data-icon="🐋">🐋</div>
+                    <div class="icon-option" data-icon="🦈">🦈</div>
+                    <div class="icon-option" data-icon="🐊">🐊</div>
+                    <div class="icon-option" data-icon="🐅">🐅</div>
+                    <div class="icon-option" data-icon="🐆">🐆</div>
+                    <div class="icon-option" data-icon="🦓">🦓</div>
+                    <div class="icon-option" data-icon="🦍">🦍</div>
+                    <div class="icon-option" data-icon="🦧">🦧</div>
+                    <div class="icon-option" data-icon="🐘">🐘</div>
+                    <div class="icon-option" data-icon="🦛">🦛</div>
+                    <div class="icon-option" data-icon="🦏">🦏</div>
+                    <div class="icon-option" data-icon="🐪">🐪</div>
+                    <div class="icon-option" data-icon="🐫">🐫</div>
+                    <div class="icon-option" data-icon="🦒">🦒</div>
+                    <div class="icon-option" data-icon="🦘">🦘</div>
+                    <div class="icon-option" data-icon="🐃">🐃</div>
+                    <div class="icon-option" data-icon="🐂">🐂</div>
+                    <div class="icon-option" data-icon="🐄">🐄</div>
+                    <div class="icon-option" data-icon="🐎">🐎</div>
+                    <div class="icon-option" data-icon="🐖">🐖</div>
+                    <div class="icon-option" data-icon="🐏">🐏</div>
+                    <div class="icon-option" data-icon="🐑">🐑</div>
+                    <div class="icon-option" data-icon="🦙">🦙</div>
+                    <div class="icon-option" data-icon="🐐">🐐</div>
+                    <div class="icon-option" data-icon="🦌">🦌</div>
+                    <div class="icon-option" data-icon="🐕">🐕</div>
+                    <div class="icon-option" data-icon="🐩">🐩</div>
+                    <div class="icon-option" data-icon="🦮">🦮</div>
+                    <div class="icon-option" data-icon="🐕‍🦺">🐕‍🦺</div>
+                    <div class="icon-option" data-icon="🐈">🐈</div>
+                    <div class="icon-option" data-icon="🐈‍⬛">🐈‍⬛</div>
+                    <div class="icon-option" data-icon="🐓">🐓</div>
+                    <div class="icon-option" data-icon="🦃">🦃</div>
+                    <div class="icon-option" data-icon="🦚">🦚</div>
+                    <div class="icon-option" data-icon="🦜">🦜</div>
+                    <div class="icon-option" data-icon="🦢">🦢</div>
+                    <div class="icon-option" data-icon="🦩">🦩</div>
+                    <div class="icon-option" data-icon="🕊️">🕊️</div>
+                    <div class="icon-option" data-icon="🐇">🐇</div>
+                    <div class="icon-option" data-icon="🦝">🦝</div>
+                    <div class="icon-option" data-icon="🦨">🦨</div>
+                    <div class="icon-option" data-icon="🦡">🦡</div>
+                    <div class="icon-option" data-icon="🦦">🦦</div>
+                    <div class="icon-option" data-icon="🦥">🦥</div>
+                    <div class="icon-option" data-icon="🐁">🐁</div>
+                    <div class="icon-option" data-icon="🐀">🐀</div>
+                    <div class="icon-option" data-icon="🐿️">🐿️</div>
+                    <div class="icon-option" data-icon="🦔">🦔</div>
+                    <div class="icon-option" data-icon="🐾">🐾</div>
+                    <div class="icon-option" data-icon="🐉">🐉</div>
+                    <div class="icon-option" data-icon="🐲">🐲</div>
+                    <div class="icon-option" data-icon="🌵">🌵</div>
+                    <div class="icon-option" data-icon="🎄">🎄</div>
+                    <div class="icon-option" data-icon="🌲">🌲</div>
+                    <div class="icon-option" data-icon="🌳">🌳</div>
+                    <div class="icon-option" data-icon="🌴">🌴</div>
+                    <div class="icon-option" data-icon="🌱">🌱</div>
+                    <div class="icon-option" data-icon="🌿">🌿</div>
+                    <div class="icon-option" data-icon="☘️">☘️</div>
+                    <div class="icon-option" data-icon="🍀">🍀</div>
+                    <div class="icon-option" data-icon="🎍">🎍</div>
+                    <div class="icon-option" data-icon="🎋">🎋</div>
+                    <div class="icon-option" data-icon="🍃">🍃</div>
+                    <div class="icon-option" data-icon="🍂">🍂</div>
+                    <div class="icon-option" data-icon="🍁">🍁</div>
+                    <div class="icon-option" data-icon="🍄">🍄</div>
+                    <div class="icon-option" data-icon="🌾">🌾</div>
+                    <div class="icon-option" data-icon="💐">💐</div>
+                    <div class="icon-option" data-icon="🌷">🌷</div>
+                    <div class="icon-option" data-icon="🌹">🌹</div>
+                    <div class="icon-option" data-icon="🥀">🥀</div>
+                    <div class="icon-option" data-icon="🌺">🌺</div>
+                    <div class="icon-option" data-icon="🌸">🌸</div>
+                    <div class="icon-option" data-icon="🌼">🌼</div>
+                    <div class="icon-option" data-icon="🌻">🌻</div>
+                    <div class="icon-option" data-icon="🌞">🌞</div>
+                    <div class="icon-option" data-icon="🌝">🌝</div>
+                    <div class="icon-option" data-icon="🌛">🌛</div>
+                    <div class="icon-option" data-icon="🌜">🌜</div>
+                    <div class="icon-option" data-icon="🌚">🌚</div>
+                    <div class="icon-option" data-icon="🌕">🌕</div>
+                    <div class="icon-option" data-icon="🌖">🌖</div>
+                    <div class="icon-option" data-icon="🌗">🌗</div>
+                    <div class="icon-option" data-icon="🌘">🌘</div>
+                    <div class="icon-option" data-icon="🌑">🌑</div>
+                    <div class="icon-option" data-icon="🌒">🌒</div>
+                    <div class="icon-option" data-icon="🌓">🌓</div>
+                    <div class="icon-option" data-icon="🌔">🌔</div>
+                    <div class="icon-option" data-icon="🌙">🌙</div>
+                    <div class="icon-option" data-icon="🌎">🌎</div>
+                    <div class="icon-option" data-icon="🌍">🌍</div>
+                    <div class="icon-option" data-icon="🌏">🌏</div>
+                    <div class="icon-option" data-icon="🪐">🪐</div>
+                    <div class="icon-option" data-icon="💫">💫</div>
+                    <div class="icon-option" data-icon="⭐">⭐</div>
+                    <div class="icon-option" data-icon="🌟">🌟</div>
+                    <div class="icon-option" data-icon="✨">✨</div>
+                    <div class="icon-option" data-icon="⚡">⚡</div>
+                    <div class="icon-option" data-icon="🔥">🔥</div>
+                    <div class="icon-option" data-icon="💥">💥</div>
+                    <div class="icon-option" data-icon="☄️">☄️</div>
+                    <div class="icon-option" data-icon="☀️">☀️</div>
+                    <div class="icon-option" data-icon="🌤️">🌤️</div>
+                    <div class="icon-option" data-icon="⛅">⛅</div>
+                    <div class="icon-option" data-icon="🌥️">🌥️</div>
+                    <div class="icon-option" data-icon="🌦️">🌦️</div>
+                    <div class="icon-option" data-icon="🌧️">🌧️</div>
+                    <div class="icon-option" data-icon="⛈️">⛈️</div>
+                    <div class="icon-option" data-icon="🌩️">🌩️</div>
+                    <div class="icon-option" data-icon="🌨️">🌨️</div>
+                    <div class="icon-option" data-icon="❄️">❄️</div>
+                    <div class="icon-option" data-icon="☃️">☃️</div>
+                    <div class="icon-option" data-icon="⛄">⛄</div>
+                    <div class="icon-option" data-icon="🌬️">🌬️</div>
+                    <div class="icon-option" data-icon="💨">💨</div>
+                    <div class="icon-option" data-icon="🌪️">🌪️</div>
+                    <div class="icon-option" data-icon="🌫️">🌫️</div>
+                    <div class="icon-option" data-icon="🌈">🌈</div>
+                    <div class="icon-option" data-icon="☂️">☂️</div>
+                    <div class="icon-option" data-icon="☔">☔</div>
+                    <div class="icon-option" data-icon="💧">💧</div>
+                    <div class="icon-option" data-icon="💦">💦</div>
+                    <div class="icon-option" data-icon="🌊">🌊</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="save-task-btn" style="width: 100%; margin-top: 20px;">
+                保存提醒
+            </button>
+        </div>
+
+        <!-- 成就页面 -->
+        <div id="badges-page" class="page">
+            <div class="top-bar">
+                <button class="icon-btn" id="back-btn-badges">←</button>
+                <h1>我的奖章</h1>
+                <div style="width: 40px;"></div>
+            </div>
+
+            <div class="date-card">
+                <div class="day" id="badges-count">0</div>
+                <div class="weekday">已获得奖章</div>
+                <div class="lunar" id="badges-total">共 12 个奖章</div>
+            </div>
+
+            <div class="badges-section">
+                <div class="badges-grid" id="badges-grid"></div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="bottom-nav">
+            <button class="nav-item active" data-page="home-page">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">首页</span>
+            </button>
+            <button class="nav-item" data-page="badges-page">
+                <span class="nav-icon">🏆</span>
+                <span class="nav-label">奖章</span>
+            </button>
+            <button class="nav-item" data-page="settings-page">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">设置</span>
+            </button>
+        </div>
+
+        <!-- 添加按钮 -->
+        <button class="fab" id="fab-btn">+</button>
+    </div>
+
+    <!-- 提醒弹窗 -->
+    <div class="reminder-modal" id="reminder-modal">
+        <div class="reminder-content">
+            <div class="reminder-illustration" id="modal-icon">🏃</div>
+            <h2 id="modal-title">该练操啦！</h2>
+            <p id="modal-desc">保持健康，从运动开始</p>
+            <div class="reminder-actions">
+                <button class="btn btn-secondary" id="modal-dismiss">稍后</button>
+                <button class="btn btn-primary" id="modal-complete">已完成</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 彩纸容器 -->
+    <div class="confetti-container" id="confetti-container"></div>
+
+    <!-- 成就弹窗 -->
+    <div class="achievement-modal" id="achievement-modal">
+        <div class="achievement-content">
+            <div class="achievement-glow"></div>
+            <div class="achievement-icon" id="achievement-icon">🏆</div>
+            <h2 id="achievement-title">获得新成就！</h2>
+            <p id="achievement-desc">连续打卡7天</p>
+            <div class="achievement-badge" id="achievement-badge">🥇 坚持达人</div>
+            <button class="btn btn-primary" id="achievement-close" style="width: 100%; margin-top: 20px;">
+                太棒了！
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 颜色配置
+        const colorSchemes = {
+            1: { c1: '#FF6B6B', c2: '#FF8E53' },
+            2: { c1: '#4ECDC4', c2: '#44A08D' },
+            3: { c1: '#FFE66D', c2: '#FFA726' },
+            4: { c1: '#A78BFA', c2: '#8B5CF6' },
+            5: { c1: '#81C784', c2: '#4CAF50' },
+            6: { c1: '#FF8E53', c2: '#FF6B6B' },
+            7: { c1: '#64B5F6', c2: '#2196F3' },
+            8: { c1: '#F06292', c2: '#E91E63' }
+        };
+
+        // 成就定义
+        const ACHIEVEMENTS = [
+            { id: 'first_day', name: '初次尝试', desc: '完成第1天打卡', icon: '🌱', condition: (stats) => stats.totalDays >= 1 },
+            { id: 'week_streak', name: '坚持一周', desc: '连续打卡7天', icon: '🔥', condition: (stats) => stats.streak >= 7 },
+            { id: 'month_streak', name: '月度达人', desc: '连续打卡30天', icon: '📅', condition: (stats) => stats.streak >= 30 },
+            { id: 'hundred_days', name: '百日坚持', desc: '累计打卡100天', icon: '💯', condition: (stats) => stats.totalDays >= 100 },
+            { id: 'perfect_week', name: '完美一周', desc: '一周全部完成', icon: '⭐', condition: (stats) => stats.perfectWeeks >= 1 },
+            { id: 'perfect_month', name: '完美一月', desc: '一月全部完成', icon: '🌟', condition: (stats) => stats.perfectMonths >= 1 },
+            { id: 'early_bird', name: '早起鸟', desc: '连续7天8点前完成', icon: '🐦', condition: (stats) => stats.earlyBird >= 7 },
+            { id: 'night_owl', name: '夜猫子', desc: '连续7天21点后完成', icon: '🦉', condition: (stats) => stats.nightOwl >= 7 },
+            { id: 'all_tasks', name: '全能选手', desc: '一天完成所有任务', icon: '🏆', condition: (stats) => stats.allTasksDays >= 1 },
+            { id: 'consistent', name: '持之以恒', desc: '累计完成500次任务', icon: '💪', condition: (stats) => stats.totalCompletions >= 500 },
+            { id: 'master', name: '健康大师', desc: '获得10个奖章', icon: '👑', condition: (stats) => stats.unlockedAchievements >= 10 },
+            { id: 'legend', name: '传奇人物', desc: '连续打卡365天', icon: '🦄', condition: (stats) => stats.streak >= 365 }
+        ];
+
+        // 状态管理
+        const STORAGE_KEY = 'healthReminder_v3';
+        
+        const defaultState = {
+            tasks: [
+                { id: 'exercise', name: '练操', time: '08:00', enabled: true, icon: '🏃', color: 1 },
+                { id: 'footSoak', name: '泡脚', time: '21:00', enabled: true, icon: '🦶', color: 2 }
+            ],
+            records: [],
+            achievements: [],
+            settings: {
+                ringtone: 'default',
+                volume: 80,
+                theme: 'theme-midnight',
+                customRingtones: []
+            }
+        };
+
+        let appState = loadState();
+        let selectedActivityType = 'exercise';
+        let selectedIcon = '🏃';
+        let selectedColor = 1;
+        let audioContext = null;
+
+        // 生成星空
+        function generateStars() {
+            const container = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+                container.appendChild(star);
+            }
+        }
+
+        // 生成几何图形
+        function generateGeoShapes() {
+            const container = document.getElementById('geo-shapes');
+            const shapes = ['circle', 'triangle', 'square', 'hexagon'];
+            
+            for (let i = 0; i < 8; i++) {
+                const shape = document.createElement('div');
+                shape.className = `geo-shape ${shapes[i % shapes.length]}`;
+                shape.style.left = Math.random() * 100 + '%';
+                shape.style.top = Math.random() * 100 + '%';
+                shape.style.animationDelay = `-${Math.random() * 25}s`;
+                shape.style.width = (Math.random() * 50 + 30) + 'px';
+                shape.style.height = (Math.random() * 50 + 30) + 'px';
+                container.appendChild(shape);
+            }
+        }
+
+        // 音频上下文
+        function getAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        // 播放铃声
+        function playRingtone(type) {
+            const ctx = getAudioContext();
+            const volume = appState.settings.volume / 100;
+
+            switch(type) {
+                case 'default':
+                    playTone(ctx, [523.25, 659.25, 783.99], volume, 'sine');
+                    break;
+                case 'gentle':
+                    playTone(ctx, [440, 554, 659, 880], volume * 0.7, 'sine', 0.3);
+                    break;
+                case 'energetic':
+                    playTone(ctx, [523, 659, 784, 1047], volume * 0.5, 'square', 0.15);
+                    break;
+                case 'nature':
+                    playNatureSound(ctx, volume);
+                    break;
+            }
+        }
+
+        function playTone(ctx, frequencies, volume, type = 'sine', interval = 0.2) {
+            frequencies.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + i * interval);
+                gain.gain.setValueAtTime(volume * 0.3, ctx.currentTime + i * interval);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * interval + 0.5);
+                osc.start(ctx.currentTime + i * interval);
+                osc.stop(ctx.currentTime + i * interval + 0.5);
+            });
+        }
+
+        function playNatureSound(ctx, volume) {
+            for (let i = 0; i < 3; i++) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                const t = ctx.currentTime + i * 0.4;
+                osc.frequency.setValueAtTime(2000, t);
+                osc.frequency.exponentialRampToValueAtTime(1500, t + 0.1);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(volume * 0.15, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                osc.start(t);
+                osc.stop(t + 0.15);
+            }
+        }
+
+        // 数据持久化
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    return { ...defaultState, ...JSON.parse(saved) };
+                } catch (e) {
+                    return defaultState;
+                }
+            }
+            return defaultState;
+        }
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        }
+
+        // 日期工具
+        function getTodayStr() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function getLunarDate() {
+            const date = new Date();
+            const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+            const lunarMonths = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+            return `农历${lunarMonths[date.getMonth()]}月${lunarDays[date.getDate() % 30]}`;
+        }
+
+        function updateDateDisplay() {
+            const now = new Date();
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            document.getElementById('current-day').textContent = now.getDate();
+            document.getElementById('current-weekday').textContent = weekdays[now.getDay()];
+            document.getElementById('current-lunar').textContent = getLunarDate();
+        }
+
+        // 获取今日记录
+        function getTodayRecord() {
+            const today = getTodayStr();
+            let record = appState.records.find(r => r.date === today);
+            if (!record) {
+                record = { date: today };
+                appState.tasks.forEach(task => {
+                    record[task.id] = false;
+                });
+                appState.records.push(record);
+                saveState();
+            }
+            return record;
+        }
+
+        // 更新进度环
+        function updateProgressRing() {
+            const record = getTodayRecord();
+            const totalTasks = appState.tasks.length;
+            const completedTasks = appState.tasks.filter(t => record[t.id]).length;
+            const percentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+            
+            const circle = document.getElementById('progress-circle');
+            const radius = 26;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            circle.style.strokeDashoffset = offset;
+            document.getElementById('progress-text').textContent = Math.round(percentage) + '%';
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            const container = document.getElementById('task-list');
+            container.innerHTML = '';
+
+            appState.tasks.forEach((task, index) => {
+                const record = getTodayRecord();
+                const isCompleted = record[task.id] || false;
+                const colors = colorSchemes[task.color] || colorSchemes[1];
+
+                const card = document.createElement('div');
+                card.className = 'task-card animate-slide-up';
+                card.style.setProperty('--card-color-1', colors.c1);
+                card.style.setProperty('--card-color-2', colors.c2);
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.dataset.taskId = task.id;
+
+                card.innerHTML = `
+                    <div class="delete-hint">长按删除</div>
+                    <div class="task-header">
+                        <div class="task-illustration">
+                            <div class="pattern"></div>
+                            <div class="pulse-ring"></div>
+                            ${task.icon}
+                        </div>
+                        <div class="task-info">
+                            <h3>${task.name}</h3>
+                            <div class="time">${task.time}</div>
+                        </div>
+                    </div>
+                    <div class="task-status">
+                        <div class="status-badge ${isCompleted ? 'completed' : 'pending'}">
+                            ${isCompleted ? '✓ 已完成' : '⏳ 待完成'}
+                        </div>
+                        <button class="complete-btn ${isCompleted ? 'completed' : ''}" data-task-id="${task.id}">
+                            <svg viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+
+                // Long press to delete
+                let pressTimer;
+                let isLongPress = false;
+
+                const startPress = (e) => {
+                    isLongPress = false;
+                    card.classList.add('show-hint');
+                    pressTimer = setTimeout(() => {
+                        isLongPress = true;
+                        card.classList.remove('show-hint');
+                        card.classList.add('deleting');
+                        if (confirm('确定要删除活动「' + task.name + '」吗？')) {
+                            deleteTask(task.id);
+                        }
+                        setTimeout(() => card.classList.remove('deleting'), 400);
+                    }, 800);
+                };
+
+                const cancelPress = () => {
+                    clearTimeout(pressTimer);
+                    card.classList.remove('show-hint');
+                };
+
+                card.addEventListener('mousedown', startPress);
+                card.addEventListener('touchstart', startPress, { passive: true });
+                card.addEventListener('mouseup', cancelPress);
+                card.addEventListener('mouseleave', cancelPress);
+                card.addEventListener('touchend', cancelPress);
+                card.addEventListener('touchmove', cancelPress);
+
+                // Prevent click after long press
+                card.addEventListener('click', (e) => {
+                    if (isLongPress) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+            });
+
+            document.querySelectorAll('.complete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const taskId = this.dataset.taskId;
+                    toggleTask(taskId);
+                });
+            });
+
+            updateProgressRing();
+        }
+
+        function deleteTask(taskId) {
+            appState.tasks = appState.tasks.filter(t => t.id !== taskId);
+            saveState();
+            renderTasks();
+            updateStats();
+        }
+
+        // 切换任务状态
+        function toggleTask(taskId) {
+            const record = getTodayRecord();
+            const wasCompleted = record[taskId];
+            record[taskId] = !record[taskId];
+            saveState();
+            renderTasks();
+            updateStats();
+            updateHistory();
+
+            if (record[taskId] && !wasCompleted) {
+                createConfetti();
+                // Earn coins for completing task (once per day per task)
+                const todayStr = new Date().toISOString().split('T')[0];
+                const dailyRewards = appState.dailyRewards || {};
+                const taskRewardKey = todayStr + '_' + taskId;
+                if (!dailyRewards[taskRewardKey]) {
+                    const earned = 5;
+                    appState.coins = (appState.coins || 0) + earned;
+                    dailyRewards[taskRewardKey] = true;
+                    appState.dailyRewards = dailyRewards;
+                    saveState();
+                    showCoinToast('+' + earned + '🪙 完成任务奖励');
+                }
+                // Check if all tasks completed today for bonus (once per day)
+                const allDone = appState.tasks.every(t => record[t.id]);
+                const bonusKey = todayStr + '_bonus';
+                if (allDone && !dailyRewards[bonusKey]) {
+                    const bonus = 20;
+                    appState.coins = (appState.coins || 0) + bonus;
+                    dailyRewards[bonusKey] = true;
+                    appState.dailyRewards = dailyRewards;
+                    saveState();
+                    setTimeout(() => showCoinToast('+' + bonus + '🪙 全勤 bonus！'), 800);
+                }
+            }
+        }
+
+        function showCoinToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FFD700,#FFA500);color:#333;padding:10px 20px;border-radius:20px;font-weight:700;font-size:14px;z-index:9999;animation:slideDown 0.3s ease;';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // 计算统计数据
+        function calculateStats() {
+            const records = appState.records;
+            let streak = 0;
+            let totalCompletions = 0;
+            let totalDays = 0;
+            let perfectWeeks = 0;
+            let perfectMonths = 0;
+            let earlyBird = 0;
+            let nightOwl = 0;
+            let allTasksDays = 0;
+            
+            const today = new Date();
+            
+            // 计算连续打卡
+            for (let i = 0; i < 365; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const record = records.find(r => r.date === dateStr);
+                
+                if (record) {
+                    const allDone = appState.tasks.every(task => record[task.id]);
+                    if (allDone) {
+                        streak++;
+                        totalDays++;
+                    } else if (i > 0) {
+                        break;
+                    }
+                } else if (i > 0) {
+                    break;
+                }
+            }
+            
+            // 计算其他统计
+            records.forEach(record => {
+                let dayCompletions = 0;
+                appState.tasks.forEach(task => {
+                    if (record[task.id]) {
+                        totalCompletions++;
+                        dayCompletions++;
+                    }
+                });
+                if (dayCompletions === appState.tasks.length) {
+                    allTasksDays++;
+                }
+            });
+            
+            return {
+                streak,
+                totalCompletions,
+                totalDays,
+                perfectWeeks,
+                perfectMonths,
+                earlyBird,
+                nightOwl,
+                allTasksDays,
+                unlockedAchievements: appState.achievements?.length || 0
+            };
+        }
+
+        // 更新统计
+        function updateStats() {
+            const stats = calculateStats();
+
+            document.getElementById('streak-count').textContent = stats.streak;
+            document.getElementById('total-count').textContent = stats.totalCompletions;
+
+            // 检查成就
+            checkAchievements(stats);
+
+            // 更新首页宠物卡片
+            renderHomePet();
+        }
+
+        function renderHomePet() {
+            const pet = appState.pet;
+            const section = document.getElementById('pet-section');
+            if (!pet) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = 'block';
+            const config = { dog: '🐕', cat: '🐈', fox: '🦊', rabbit: '🐇' };
+            document.getElementById('home-pet-emoji').textContent = config[pet.type] || '🐕';
+            document.getElementById('home-pet-name').textContent = pet.name;
+            document.getElementById('home-pet-status').textContent =
+                '饱食度 ' + Math.round(pet.hunger) + '% · 心情 ' + Math.round(pet.mood) + '% · Lv.' + pet.level;
+        }
+
+        // 检查成就
+        function checkAchievements(stats) {
+            const newlyUnlocked = [];
+            
+            ACHIEVEMENTS.forEach(achievement => {
+                if (!appState.achievements.includes(achievement.id)) {
+                    if (achievement.condition(stats)) {
+                        appState.achievements.push(achievement.id);
+                        newlyUnlocked.push(achievement);
+                    }
+                }
+            });
+            
+            if (newlyUnlocked.length > 0) {
+                saveState();
+                renderAchievements();
+                renderBadges();
+
+                // Award coins for each new achievement
+                newlyUnlocked.forEach(ach => {
+                    const coinReward = 30;
+                    appState.coins = (appState.coins || 0) + coinReward;
+                });
+                saveState();
+
+                // 显示第一个新成就
+                setTimeout(() => {
+                    showAchievementModal(newlyUnlocked[0]);
+                    if (newlyUnlocked.length > 1) {
+                        setTimeout(() => showCoinToast('+' + (newlyUnlocked.length * 30) + '🪙 成就奖励'), 1200);
+                    } else {
+                        setTimeout(() => showCoinToast('+30🪙 成就奖励'), 1200);
+                    }
+                }, 500);
+            }
+        }
+
+        // 显示成就弹窗
+        function showAchievementModal(achievement) {
+            const modal = document.getElementById('achievement-modal');
+            document.getElementById('achievement-icon').textContent = achievement.icon;
+            document.getElementById('achievement-title').textContent = '获得新成就！';
+            document.getElementById('achievement-desc').textContent = achievement.desc;
+            document.getElementById('achievement-badge').textContent = `${achievement.icon} ${achievement.name}`;
+            
+            modal.classList.add('active');
+            
+            // 播放特殊音效
+            playAchievementSound();
+            
+            document.getElementById('achievement-close').onclick = () => {
+                modal.classList.remove('active');
+            };
+        }
+
+        // 成就音效
+        function playAchievementSound() {
+            const ctx = getAudioContext();
+            const notes = [523, 659, 784, 1047, 1319];
+            
+            notes.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                const t = ctx.currentTime + i * 0.1;
+                osc.frequency.setValueAtTime(freq, t);
+                gain.gain.setValueAtTime(0.2, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc.start(t);
+                osc.stop(t + 0.3);
+            });
+        }
+
+        // 渲染成就列表
+        function renderAchievements() {
+            const container = document.getElementById('achievements-grid');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            const stats = calculateStats();
+            
+            // 只显示前6个成就
+            ACHIEVEMENTS.slice(0, 6).forEach(achievement => {
+                const isUnlocked = appState.achievements.includes(achievement.id);
+                const progress = calculateAchievementProgress(achievement, stats);
+                
+                const card = document.createElement('div');
+                card.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+                
+                card.innerHTML = `
+                    <span class="achievement-medal">${achievement.icon}</span>
+                    <div class="achievement-name">${achievement.name}</div>
+                    <div class="achievement-desc">${achievement.desc}</div>
+                    ${!isUnlocked ? `
+                        <div class="achievement-progress">
+                            <div class="achievement-progress-bar" style="width: ${progress.percentage}%"></div>
+                        </div>
+                        <div class="achievement-progress-text">${progress.current}/${progress.target}</div>
+                    ` : '<div style="color: #4CAF50; font-size: 12px; margin-top: 4px;">✓ 已获得</div>'}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 计算成就进度
+        function calculateAchievementProgress(achievement, stats) {
+            switch(achievement.id) {
+                case 'first_day':
+                    return { current: stats.totalDays, target: 1, percentage: Math.min(stats.totalDays * 100, 100) };
+                case 'week_streak':
+                    return { current: stats.streak, target: 7, percentage: Math.min((stats.streak / 7) * 100, 100) };
+                case 'month_streak':
+                    return { current: stats.streak, target: 30, percentage: Math.min((stats.streak / 30) * 100, 100) };
+                case 'hundred_days':
+                    return { current: stats.totalDays, target: 100, percentage: Math.min((stats.totalDays / 100) * 100, 100) };
+                case 'all_tasks':
+                    return { current: stats.allTasksDays, target: 1, percentage: Math.min(stats.allTasksDays * 100, 100) };
+                case 'consistent':
+                    return { current: stats.totalCompletions, target: 500, percentage: Math.min((stats.totalCompletions / 500) * 100, 100) };
+                default:
+                    return { current: 0, target: 1, percentage: 0 };
+            }
+        }
+
+        // 渲染奖章页面
+        function renderBadges() {
+            const container = document.getElementById('badges-grid');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            const stats = calculateStats();
+            
+            document.getElementById('badges-count').textContent = appState.achievements.length;
+            
+            ACHIEVEMENTS.forEach(achievement => {
+                const isUnlocked = appState.achievements.includes(achievement.id);
+                const unlockDate = isUnlocked ? '已获得' : '未获得';
+                
+                const card = document.createElement('div');
+                card.className = `badge-card ${isUnlocked ? '' : 'locked'}`;
+                card.style.opacity = isUnlocked ? '1' : '0.5';
+                
+                card.innerHTML = `
+                    <span class="badge-icon">${achievement.icon}</span>
+                    <div class="badge-name">${achievement.name}</div>
+                    <div class="badge-desc">${achievement.desc}</div>
+                    <div class="badge-date">${unlockDate}</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 根据日期生成伪随机天气
+        function getWeatherForDate(dateStr) {
+            const weathers = ['☀️', '⛅', '☁️', '🌧️', '⛈️', '🌤️'];
+            let hash = 0;
+            for (let i = 0; i < dateStr.length; i++) {
+                hash = ((hash << 5) - hash) + dateStr.charCodeAt(i);
+                hash |= 0;
+            }
+            return weathers[Math.abs(hash) % weathers.length];
+        }
+
+        // 更新历史记录
+        function updateHistory() {
+            const grid = document.getElementById('history-grid');
+            grid.innerHTML = '';
+
+            const today = new Date();
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const record = appState.records.find(r => r.date === dateStr);
+                const weather = getWeatherForDate(dateStr);
+
+                const dayEl = document.createElement('div');
+                dayEl.className = 'history-day';
+
+                const allDone = appState.tasks.length > 0 && appState.tasks.every(t => record?.[t.id]);
+                const statusEmoji = allDone ? '✅' : (record ? '⏳' : '—');
+
+                dayEl.innerHTML = `
+                    <div class="day-name">${weekdays[date.getDay()]}</div>
+                    <div class="day-num">${date.getDate()}</div>
+                    <div class="weather">${weather}</div>
+                    <div class="day-status" style="font-size: 12px; color: ${allDone ? '#4ECDC4' : '#888'}; font-weight: 600; margin-top: 4px;">${statusEmoji}</div>
+                `;
+
+                grid.appendChild(dayEl);
+            }
+        }
+
+        // 彩纸效果
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A78BFA', '#81C784', '#FF8E53', '#64B5F6', '#F06292'];
+            
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.top = '-20px';
+                piece.style.width = (Math.random() * 10 + 5) + 'px';
+                piece.style.height = (Math.random() * 10 + 5) + 'px';
+                piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                piece.style.animationDelay = Math.random() * 0.5 + 's';
+                piece.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+                container.appendChild(piece);
+                setTimeout(() => piece.remove(), 2500);
+            }
+        }
+
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === pageId);
+            });
+            
+            const fab = document.getElementById('fab-btn');
+            fab.style.display = pageId === 'home-page' ? 'flex' : 'none';
+        }
+
+        // 渲染任务设置列表
+        function renderTaskSettings() {
+            const container = document.getElementById('task-settings-list');
+            container.innerHTML = '';
+            
+            appState.tasks.forEach(task => {
+                const colors = colorSchemes[task.color] || colorSchemes[1];
+                const group = document.createElement('div');
+                group.className = 'settings-group';
+                group.innerHTML = `
+                    <h3><span>${task.icon}</span> ${task.name}</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-icon" style="background: linear-gradient(135deg, ${colors.c1}15, ${colors.c2}15);">${task.icon}</div>
+                            提醒时间
+                        </div>
+                        <input type="time" class="time-input task-time-input" data-task-id="${task.id}" value="${task.time}">
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <div class="setting-icon" style="background: linear-gradient(135deg, ${colors.c1}15, ${colors.c2}15);">🔔</div>
+                            开启提醒
+                        </div>
+                        <div class="toggle ${task.enabled ? 'active' : ''}" data-task-id="${task.id}">
+                            <div class="toggle-knob"></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(group);
+            });
+            
+            // 绑定事件
+            document.querySelectorAll('.task-time-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const task = appState.tasks.find(t => t.id === this.dataset.taskId);
+                    if (task) {
+                        task.time = this.value;
+                        saveState();
+                        renderTasks();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.toggle[data-task-id]').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const task = appState.tasks.find(t => t.id === this.dataset.taskId);
+                    if (task) {
+                        task.enabled = !task.enabled;
+                        this.classList.toggle('active');
+                        saveState();
+                    }
+                });
+            });
+        }
+
+        // 提醒检查
+        let lastNotified = {};
+
+        function checkReminders() {
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            const today = getTodayStr();
+            
+            appState.tasks.forEach(task => {
+                if (!task.enabled) return;
+                if (task.time !== currentTime) return;
+                if (lastNotified[task.id] === today) return;
+                
+                showReminderModal(task);
+                playRingtone(appState.settings.ringtone);
+                
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('健康管家提醒', {
+                        body: `该${task.name}啦！`,
+                        icon: task.icon
+                    });
+                }
+                
+                lastNotified[task.id] = today;
+            });
+        }
+
+        // 显示提醒弹窗
+        function showReminderModal(task) {
+            const modal = document.getElementById('reminder-modal');
+            document.getElementById('modal-icon').textContent = task.icon;
+            document.getElementById('modal-title').textContent = `该${task.name}啦！`;
+            document.getElementById('modal-desc').textContent = `现在是 ${task.time}，记得${task.name}哦`;
+            
+            modal.classList.add('active');
+            
+            document.getElementById('modal-complete').onclick = () => {
+                toggleTask(task.id);
+                modal.classList.remove('active');
+            };
+            
+            document.getElementById('modal-dismiss').onclick = () => {
+                modal.classList.remove('active');
+            };
+        }
+
+        // 侧边栏控制
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        // 更新侧边栏等级
+        function updateSidebarLevel() {
+            const stats = calculateStats();
+            let level = 'Lv.1 健康新手';
+            if (stats.streak >= 365) level = 'Lv.6 传奇人物';
+            else if (stats.streak >= 100) level = 'Lv.5 健康大师';
+            else if (stats.streak >= 30) level = 'Lv.4 月度达人';
+            else if (stats.streak >= 14) level = 'Lv.3 坚持达人';
+            else if (stats.streak >= 7) level = 'Lv.2 健康爱好者';
+            
+            document.getElementById('sidebar-level').textContent = level;
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 侧边栏
+            document.getElementById('menu-btn').addEventListener('click', toggleSidebar);
+            document.getElementById('sidebar-overlay').addEventListener('click', closeSidebar);
+            
+            // 侧边栏菜单项
+            document.getElementById('sidebar-profile').addEventListener('click', () => {
+                closeSidebar();
+                window.location.href = 'profile.html';
+            });
+
+            document.getElementById('sidebar-stats').addEventListener('click', () => {
+                closeSidebar();
+                window.location.href = 'stats.html';
+            });
+            
+            document.getElementById('sidebar-achievements').addEventListener('click', () => {
+                closeSidebar();
+                showPage('badges-page');
+            });
+
+            document.getElementById('sidebar-pet').addEventListener('click', () => {
+                closeSidebar();
+                window.location.href = 'pet.html';
+            });
+
+            document.getElementById('sidebar-theme').addEventListener('click', () => {
+                closeSidebar();
+                showPage('settings-page');
+            });
+            
+            document.getElementById('sidebar-sound').addEventListener('click', () => {
+                closeSidebar();
+                showPage('settings-page');
+            });
+            
+            document.getElementById('sidebar-export').addEventListener('click', () => {
+                closeSidebar();
+                exportData();
+            });
+            
+            document.getElementById('sidebar-help').addEventListener('click', () => {
+                closeSidebar();
+                alert('使用帮助：\n1. 点击+添加健康活动\n2. 设置提醒时间\n3. 完成任务后点击标记\n4. 坚持打卡获得成就');
+            });
+            
+            document.getElementById('sidebar-about').addEventListener('click', () => {
+                closeSidebar();
+                alert('健康管家 v1.0\n让健康成为一种习惯');
+            });
+            
+            // 底部导航
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => showPage(item.dataset.page));
+            });
+            
+            // 返回按钮
+            document.getElementById('back-btn').addEventListener('click', () => showPage('home-page'));
+            document.getElementById('back-btn-add').addEventListener('click', () => showPage('home-page'));
+            document.getElementById('back-btn-badges').addEventListener('click', () => showPage('home-page'));
+            
+            // 设置按钮
+            document.getElementById('notif-btn').addEventListener('click', () => {
+                renderTaskSettings();
+                showPage('settings-page');
+            });
+            
+            // FAB按钮
+            document.getElementById('fab-btn').addEventListener('click', () => showPage('add-task-page'));
+            
+            // 铃声选择
+            document.querySelectorAll('.ringtone-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.ringtone-item').forEach(i => i.classList.remove('selected'));
+                    this.classList.add('selected');
+                    appState.settings.ringtone = this.dataset.ringtone;
+                    saveState();
+                });
+            });
+            
+            // 播放按钮
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const ringtone = this.dataset.ringtone;
+                    playRingtone(ringtone);
+                    this.textContent = '⏸';
+                    setTimeout(() => this.textContent = '▶', 1000);
+                });
+            });
+            
+            // 音量控制
+            document.getElementById('volume-slider').addEventListener('input', function() {
+                appState.settings.volume = this.value;
+                document.getElementById('volume-value').textContent = this.value + '%';
+                saveState();
+            });
+            
+            // 文件上传
+            document.getElementById('upload-ringtone').addEventListener('click', () => {
+                document.getElementById('ringtone-file').click();
+            });
+            
+            document.getElementById('ringtone-file').addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    alert('铃声上传成功！');
+                }
+            });
+            
+            // 通知权限
+            document.getElementById('request-notif-btn').addEventListener('click', () => {
+                if (!('Notification' in window)) {
+                    alert('您的浏览器不支持通知功能');
+                    return;
+                }
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') alert('通知权限已开启！');
+                });
+            });
+            
+            // 主题选择
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const theme = this.dataset.theme;
+                    applyTheme(theme);
+                    appState.settings.theme = theme;
+                    saveState();
+                });
+            });
+
+            // 图标选择
+            document.querySelectorAll('.icon-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedIcon = this.dataset.icon;
+                });
+            });
+
+            // 活动类型选择
+            document.querySelectorAll('.activity-tag').forEach(tag => {
+                tag.addEventListener('click', function() {
+                    document.querySelectorAll('.activity-tag').forEach(t => t.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedActivityType = this.dataset.type;
+                    selectedIcon = this.dataset.icon;
+                    selectedColor = parseInt(this.dataset.color);
+                    document.getElementById('new-task-name').value = this.textContent.trim().substring(2);
+                    
+                    // 同步更新图标选择器
+                    document.querySelectorAll('.icon-option').forEach(o => {
+                        o.classList.toggle('selected', o.dataset.icon === selectedIcon);
+                    });
+                });
+            });
+            
+            // 添加任务
+            document.getElementById('save-task-btn').addEventListener('click', () => {
+                const name = document.getElementById('new-task-name').value.trim();
+                const time = document.getElementById('new-task-time').value;
+                
+                if (!name) {
+                    alert('请输入任务名称');
+                    return;
+                }
+                
+                const newTask = {
+                    id: 'task_' + Date.now(),
+                    name,
+                    time,
+                    enabled: true,
+                    icon: selectedIcon,
+                    color: selectedColor
+                };
+                
+                appState.tasks.push(newTask);
+                saveState();
+                renderTasks();
+                updateHistory();
+                showPage('home-page');
+                
+                document.getElementById('new-task-name').value = '';
+            });
+        }
+
+        // 应用主题
+        function applyTheme(theme) {
+            document.body.className = '';
+            if (theme) {
+                document.body.classList.add(theme);
+            }
+        }
+
+        // 导出数据
+        function exportData() {
+            const data = {
+                tasks: appState.tasks,
+                records: appState.records,
+                achievements: appState.achievements,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `健康管家数据_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('数据导出成功！');
+        }
+
+        // 注册 Service Worker
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker 注册成功:', registration);
+                        
+                        // 请求后台同步权限
+                        if ('sync' in registration) {
+                            registration.sync.register('health-reminder')
+                                .then(() => console.log('后台同步已注册'))
+                                .catch(err => console.log('后台同步注册失败:', err));
+                        }
+                        
+                        // 请求推送通知权限
+                        if ('pushManager' in registration) {
+                            registration.pushManager.getSubscription()
+                                .then(subscription => {
+                                    if (!subscription) {
+                                        console.log('未订阅推送通知');
+                                    }
+                                });
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Service Worker 注册失败:', error);
+                    });
+            }
+        }
+
+        // 安装提示
+        let deferredPrompt;
+        
+        function setupInstallPrompt() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // 阻止默认的安装提示
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // 显示自定义安装按钮
+                showInstallButton();
+            });
+            
+            window.addEventListener('appinstalled', () => {
+                console.log('应用已安装');
+                deferredPrompt = null;
+                hideInstallButton();
+            });
+        }
+        
+        function showInstallButton() {
+            // 可以在这里显示一个安装按钮
+            console.log('可以安装应用');
+        }
+        
+        function hideInstallButton() {
+            console.log('隐藏安装按钮');
+        }
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('用户接受安装');
+                    } else {
+                        console.log('用户拒绝安装');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // 检查应用是否已安装
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
+        }
+
+        // 初始化
+        function init() {
+            registerServiceWorker();
+            setupInstallPrompt();
+            
+            generateStars();
+            generateGeoShapes();
+            applyTheme(appState.settings.theme);
+            updateDateDisplay();
+            renderTasks();
+            updateStats();
+            updateHistory();
+            renderAchievements();
+            renderBadges();
+            updateSidebarLevel();
+            initEventListeners();
+            
+            document.getElementById('volume-slider').value = appState.settings.volume;
+            document.getElementById('volume-value').textContent = appState.settings.volume + '%';
+            
+            // 设置当前主题选中状态
+            document.querySelectorAll('.theme-option').forEach(o => {
+                o.classList.toggle('selected', o.dataset.theme === appState.settings.theme);
+            });
+            
+            setInterval(checkReminders, 30000);
+            checkReminders();
+            
+            // 如果已安装，显示提示
+            if (isAppInstalled()) {
+                console.log('应用已安装为PWA');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>

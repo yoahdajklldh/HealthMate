@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>萌宠养成 - 健康管家</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: white;
+            padding-bottom: 100px;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(20px);
+            z-index: 50;
+        }
+        .icon-btn {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            border: none; color: white; font-size: 18px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .coin-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* 宠物选择 */
+        .pet-select-section {
+            padding: 20px 16px;
+            text-align: center;
+        }
+        .pet-select-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .pet-options {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .pet-option {
+            width: 100px;
+            padding: 16px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .pet-option:hover { transform: translateY(-4px); }
+        .pet-option.selected {
+            border-color: #FFD700;
+            background: rgba(255,215,0,0.15);
+        }
+        .pet-option-emoji {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+        .pet-option-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* 宠物展示 */
+        .pet-stage {
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        .pet-scene {
+            width: 240px;
+            height: 240px;
+            margin: 0 auto;
+            position: relative;
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(240,147,251,0.2));
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 32px rgba(102,126,234,0.25), inset 0 0 60px rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scenePulse 3s ease-in-out infinite;
+        }
+        .pet-scene.sick {
+            background: linear-gradient(135deg, rgba(129,199,132,0.2), rgba(255,193,7,0.2));
+            border-color: rgba(255,193,7,0.4);
+            animation: sickPulse 2s ease-in-out infinite;
+        }
+        .pet-scene.dead {
+            background: linear-gradient(135deg, rgba(117,117,117,0.3), rgba(33,33,33,0.3));
+            border-color: rgba(158,158,158,0.3);
+            animation: none;
+        }
+        @keyframes scenePulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(102,126,234,0.25), inset 0 0 60px rgba(255,255,255,0.05); }
+            50% { box-shadow: 0 12px 40px rgba(102,126,234,0.35), inset 0 0 80px rgba(255,255,255,0.08); }
+        }
+        @keyframes sickPulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(255,193,7,0.2), inset 0 0 60px rgba(255,255,255,0.03); }
+            50% { box-shadow: 0 12px 40px rgba(255,193,7,0.3), inset 0 0 80px rgba(255,255,255,0.05); }
+        }
+        .pet-container {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pet-emoji {
+            font-size: 110px;
+            line-height: 1;
+            display: block;
+            z-index: 2;
+            position: relative;
+        }
+
+        /* 各宠物独特动态 */
+        .pet-emoji.pet-dog {
+            animation: dogWag 1.8s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+        @keyframes dogWag {
+            0%, 100% { transform: rotate(-3deg) translateY(0); }
+            25% { transform: rotate(3deg) translateY(-4px); }
+            50% { transform: rotate(-3deg) translateY(0); }
+            75% { transform: rotate(3deg) translateY(-4px); }
+        }
+
+        .pet-emoji.pet-cat {
+            animation: catGroom 3s ease-in-out infinite;
+        }
+        @keyframes catGroom {
+            0%, 70%, 100% { transform: translateY(0) scale(1); }
+            75% { transform: translateY(-2px) scale(1.02); }
+            80% { transform: translateY(0) scale(1); }
+            85% { transform: translateY(-2px) scale(1.02); }
+        }
+
+        .pet-emoji.pet-horse {
+            animation: horseGallop 1.6s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+        @keyframes horseGallop {
+            0%, 100% { transform: translateX(-4px) scaleY(1); }
+            25% { transform: translateX(4px) scaleY(0.95) translateY(-6px); }
+            50% { transform: translateX(-4px) scaleY(1); }
+            75% { transform: translateX(4px) scaleY(0.95) translateY(-6px); }
+        }
+
+        .pet-emoji.pet-rabbit {
+            animation: rabbitHop 1.2s ease-in-out infinite;
+            transform-origin: bottom center;
+        }
+        @keyframes rabbitHop {
+            0%, 100% { transform: scaleY(0.9) translateY(0); }
+            40% { transform: scaleY(1.1) translateY(-15px); }
+            60% { transform: scaleY(0.9) translateY(0); }
+        }
+
+        .pet-emoji.pet-tiger {
+            animation: tigerProwl 2.5s ease-in-out infinite;
+        }
+        @keyframes tigerProwl {
+            0%, 100% { transform: translateY(0); }
+            20% { transform: translateY(-3px) scale(1.02); }
+            40% { transform: translateY(0); }
+            60% { transform: translateY(-3px) scale(1.02); }
+            80% { transform: translateY(0); }
+        }
+
+        /* 状态低时的动态 */
+        .pet-emoji.pet-sad {
+            animation: petSad 2s ease-in-out infinite !important;
+            filter: grayscale(0.3);
+        }
+        @keyframes petSad {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(2px) rotate(-2deg); }
+        }
+
+        .pet-emoji.pet-hungry {
+            animation: petHungry 1.5s ease-in-out infinite !important;
+        }
+        @keyframes petHungry {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+
+        .pet-emoji.pet-sleepy {
+            animation: petSleep 3s ease-in-out infinite !important;
+        }
+        @keyframes petSleep {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(-2px); opacity: 0.7; }
+        }
+
+        /* 互动时的动态 */
+        .pet-emoji.pet-happy {
+            animation: petHappy 0.6s ease-out !important;
+        }
+        @keyframes petHappy {
+            0% { transform: scale(1) rotate(0); }
+            30% { transform: scale(1.15) rotate(-5deg); }
+            60% { transform: scale(1.15) rotate(5deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+
+        .pet-emoji.pet-eating {
+            animation: petEat 0.5s ease-out !important;
+        }
+        @keyframes petEat {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.1) translateY(-5px); }
+            60% { transform: scale(0.95) translateY(2px); }
+            100% { transform: scale(1); }
+        }
+
+        .pet-emoji.pet-bathing {
+            animation: petBath 0.8s ease-out !important;
+        }
+        @keyframes petBath {
+            0% { transform: rotate(0) scale(1); }
+            25% { transform: rotate(-10deg) scale(1.05); }
+            50% { transform: rotate(10deg) scale(1.05); }
+            75% { transform: rotate(-5deg) scale(1.02); }
+            100% { transform: rotate(0) scale(1); }
+        }
+
+        .pet-emoji.pet-playing {
+            animation: petPlay 0.7s ease-out !important;
+        }
+        @keyframes petPlay {
+            0% { transform: translateX(0) rotate(0); }
+            20% { transform: translateX(-15px) rotate(-15deg); }
+            40% { transform: translateX(15px) rotate(15deg); }
+            60% { transform: translateX(-10px) rotate(-10deg); }
+            80% { transform: translateX(10px) rotate(10deg); }
+            100% { transform: translateX(0) rotate(0); }
+        }
+
+        .pet-emoji.pet-sleeping {
+            animation: petSleeping 1s ease-out forwards !important;
+        }
+        @keyframes petSleeping {
+            0% { transform: scale(1); }
+            100% { transform: scale(0.9) translateY(5px); opacity: 0.6; }
+        }
+
+        /* 升级时的动态 */
+        .pet-emoji.pet-levelup {
+            animation: petLevelUp 1s ease-out !important;
+        }
+        @keyframes petLevelUp {
+            0% { transform: scale(1); filter: brightness(1); }
+            30% { transform: scale(1.3); filter: brightness(1.5); }
+            60% { transform: scale(1.2); filter: brightness(1.3); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
+        /* 装饰粒子 */
+        .pet-particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+            font-size: 20px;
+            animation: particleFloat 1.2s ease-out forwards;
+        }
+        @keyframes particleFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(0.5); }
+        }
+
+        /* 地面阴影 */
+        .pet-shadow {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 16px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 50%;
+            z-index: 1;
+            animation: shadowPulse 2s ease-in-out infinite;
+        }
+        @keyframes shadowPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.15; }
+            50% { transform: translateX(-50%) scale(0.8); opacity: 0.1; }
+        }
+
+        /* 生病/死亡状态 */
+        .pet-status-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        .tag-sick {
+            background: linear-gradient(135deg, #FF9800, #FFC107);
+            color: #333;
+            animation: tagBlink 1.5s ease-in-out infinite;
+        }
+        .tag-dead {
+            background: linear-gradient(135deg, #757575, #9E9E9E);
+            color: white;
+        }
+        @keyframes tagBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .pet-emoji.pet-sick {
+            animation: petSickShake 2s ease-in-out infinite !important;
+            filter: sepia(0.3) saturate(0.7);
+        }
+        @keyframes petSickShake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            10% { transform: translateX(-2px) rotate(-1deg); }
+            20% { transform: translateX(2px) rotate(1deg); }
+            30% { transform: translateX(-2px) rotate(-1deg); }
+            40% { transform: translateX(0) rotate(0); }
+            100% { transform: translateX(0) rotate(0); }
+        }
+
+        .pet-emoji.pet-dead {
+            animation: none !important;
+            filter: grayscale(1) brightness(0.5);
+            transform: rotate(90deg) translateY(10px);
+        }
+        .pet-accessory {
+            position: absolute;
+            pointer-events: none;
+            z-index: 3;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        .acc-hat {
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+        }
+        .acc-glasses {
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 42px;
+        }
+        .acc-bow {
+            bottom: 8px;
+            right: 8px;
+            font-size: 36px;
+        }
+        .pet-hearts {
+            position: absolute;
+            top: -20px;
+            right: 10px;
+            font-size: 24px;
+            animation: floatUp 1.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 4;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-40px); }
+        }
+        .pet-name-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .pet-name {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .pet-name-edit {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.15);
+            border: none; color: white;
+            font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .pet-level {
+            display: inline-block;
+            padding: 4px 14px;
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .pet-stage-badges {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .stage-badge {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .stage-active { background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; }
+        .stage-inactive { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+
+        /* 状态条 */
+        .status-bars {
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            margin-bottom: 14px;
+        }
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .status-label {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-value {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+        }
+        .status-bar-bg {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .status-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .status-hunger .status-bar-fill { background: linear-gradient(90deg, #FF6B6B, #FF8E53); }
+        .status-hygiene .status-bar-fill { background: linear-gradient(90deg, #4ECDC4, #44A08D); }
+        .status-mood .status-bar-fill { background: linear-gradient(90deg, #f093fb, #f5576c); }
+        .status-energy .status-bar-fill { background: linear-gradient(90deg, #FFE66D, #FFA726); }
+
+        /* 互动按钮 */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 0 16px;
+            margin-bottom: 20px;
+        }
+        .action-btn {
+            background: rgba(255,255,255,0.95);
+            border: none;
+            border-radius: 20px;
+            padding: 16px 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        .action-btn:active { transform: scale(0.95); }
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .action-btn-icon {
+            font-size: 32px;
+            margin-bottom: 6px;
+        }
+        .action-btn-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        .action-btn-cost {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* 管理按钮 */
+        .manage-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+        .manage-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .manage-btn:active { transform: scale(0.97); }
+
+        /* 商店 */
+        .shop-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 20px;
+            margin: 0 16px 16px;
+            color: #333;
+        }
+        .shop-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .shop-item {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 14px 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 80px;
+        }
+        .shop-item:hover { transform: translateY(-2px); }
+        .shop-item-emoji {
+            font-size: 36px;
+            flex-shrink: 0;
+            width: 44px;
+            text-align: center;
+        }
+        .shop-item-info {
+            flex: 1;
+            text-align: left;
+            min-width: 0;
+        }
+        .shop-item-name {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .shop-item-desc {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .shop-item-price {
+            font-size: 12px;
+            color: #FFA500;
+            font-weight: 700;
+        }
+        .shop-item-count {
+            position: absolute;
+            top: 4px; right: 4px;
+            font-size: 11px;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        /* 日志 */
+        .log-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 20px;
+            margin: 0 16px 16px;
+            color: #333;
+        }
+        .log-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #667eea;
+        }
+        .log-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        .log-item:last-child { border-bottom: none; }
+        .log-time { color: #888; font-size: 12px; min-width: 50px; }
+        .log-text { flex: 1; }
+        .log-coin { color: #FFA500; font-weight: 700; }
+
+        /* 提示 */
+        .tip-card {
+            background: linear-gradient(135deg, rgba(102,126,234,0.15), rgba(240,147,251,0.15));
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin: 0 16px 16px;
+            border: 1px solid rgba(102,126,234,0.2);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .tip-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        /* 空状态 */
+        .empty-pet {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .empty-pet-emoji { font-size: 64px; margin-bottom: 16px; }
+        .empty-pet-text { font-size: 16px; opacity: 0.7; margin-bottom: 20px; }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #f093fb);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            max-width: 320px;
+            color: #333;
+            text-align: center;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+        .modal-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .modal-btn-cancel { background: #f0f0f0; color: #666; }
+        .modal-btn-confirm { background: linear-gradient(135deg, #667eea, #f093fb); color: white; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <button class="icon-btn" onclick="history.back()">←</button>
+        <h1>萌宠养成</h1>
+        <div class="coin-display">
+            <span>🪙</span>
+            <span id="coin-count">0</span>
+        </div>
+    </div>
+
+    <div id="pet-content">
+        <!-- 未选择宠物时显示 -->
+        <div class="empty-pet" id="pet-empty">
+            <div class="empty-pet-emoji">🏠</div>
+            <div class="empty-pet-text">你还没有宠物，快去领养一只吧！</div>
+            <button class="btn-primary" onclick="showPetSelect()">去领养</button>
+        </div>
+
+        <!-- 宠物选择 -->
+        <div class="pet-select-section" id="pet-select" style="display: none;">
+            <div class="pet-select-title">选择你的萌宠伙伴</div>
+            <div class="pet-options">
+                <div class="pet-option" data-type="dog" onclick="adoptPet('dog')">
+                    <div class="pet-option-emoji">🐕</div>
+                    <div class="pet-option-name">小狗</div>
+                </div>
+                <div class="pet-option" data-type="cat" onclick="adoptPet('cat')">
+                    <div class="pet-option-emoji">🐈</div>
+                    <div class="pet-option-name">小猫</div>
+                </div>
+                <div class="pet-option" data-type="horse" onclick="adoptPet('horse')">
+                    <div class="pet-option-emoji">🐎</div>
+                    <div class="pet-option-name">小马</div>
+                </div>
+                <div class="pet-option" data-type="rabbit" onclick="adoptPet('rabbit')">
+                    <div class="pet-option-emoji">🐇</div>
+                    <div class="pet-option-name">小兔子</div>
+                </div>
+                <div class="pet-option" data-type="tiger" onclick="adoptPet('tiger')">
+                    <div class="pet-option-emoji">🐅</div>
+                    <div class="pet-option-name">小老虎</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 已领养宠物 -->
+        <div id="pet-owned" style="display: none;">
+            <div class="pet-stage">
+                <div class="pet-scene">
+                    <div class="pet-container" id="pet-container">
+                        <span class="pet-emoji" id="pet-emoji">🐕</span>
+                        <div id="pet-accessories"></div>
+                        <div class="pet-shadow" id="pet-shadow"></div>
+                    </div>
+                </div>
+                <div class="pet-name-row">
+                    <div class="pet-name" id="pet-name">旺财</div>
+                    <button class="pet-name-edit" onclick="showRenameModal()">✏️</button>
+                </div>
+                <div class="pet-level" id="pet-level">Lv.1 幼年期</div>
+                <div id="pet-status-tag"></div>
+                <div class="pet-stage-badges" id="stage-badges">
+                    <span class="stage-badge stage-active">🥚 幼年期</span>
+                    <span class="stage-badge stage-inactive">🌱 少年期</span>
+                    <span class="stage-badge stage-inactive">🌳 成熟期</span>
+                    <span class="stage-badge stage-inactive">👑 王者期</span>
+                    <span class="stage-badge stage-inactive">🔥 传说期</span>
+                </div>
+            </div>
+
+            <div class="status-bars">
+                <div class="status-item status-hunger">
+                    <div class="status-header">
+                        <span class="status-label">🍖 饱食度</span>
+                        <span class="status-value" id="hunger-val">80%</span>
+                    </div>
+                    <div class="status-bar-bg">
+                        <div class="status-bar-fill" id="hunger-bar" style="width: 80%"></div>
+                    </div>
+                </div>
+                <div class="status-item status-hygiene">
+                    <div class="status-header">
+                        <span class="status-label">🛁 清洁度</span>
+                        <span class="status-value" id="hygiene-val">80%</span>
+                    </div>
+                    <div class="status-bar-bg">
+                        <div class="status-bar-fill" id="hygiene-bar" style="width: 80%"></div>
+                    </div>
+                </div>
+                <div class="status-item status-mood">
+                    <div class="status-header">
+                        <span class="status-label">😊 心情</span>
+                        <span class="status-value" id="mood-val">80%</span>
+                    </div>
+                    <div class="status-bar-bg">
+                        <div class="status-bar-fill" id="mood-bar" style="width: 80%"></div>
+                    </div>
+                </div>
+                <div class="status-item status-energy">
+                    <div class="status-header">
+                        <span class="status-label">⚡ 精力</span>
+                        <span class="status-value" id="energy-val">80%</span>
+                    </div>
+                    <div class="status-bar-bg">
+                        <div class="status-bar-fill" id="energy-bar" style="width: 80%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn" id="btn-feed" onclick="interact('feed')">
+                    <div class="action-btn-icon">🍖</div>
+                    <div class="action-btn-label">喂食</div>
+                    <div class="action-btn-cost">10🪙</div>
+                </button>
+                <button class="action-btn" id="btn-bath" onclick="interact('bath')">
+                    <div class="action-btn-icon">🛁</div>
+                    <div class="action-btn-label">洗澡</div>
+                    <div class="action-btn-cost">15🪙</div>
+                </button>
+                <button class="action-btn" id="btn-play" onclick="interact('play')">
+                    <div class="action-btn-icon">🎾</div>
+                    <div class="action-btn-label">玩耍</div>
+                    <div class="action-btn-cost">20🪙</div>
+                </button>
+                <button class="action-btn" id="btn-sleep" onclick="interact('sleep')">
+                    <div class="action-btn-icon">😴</div>
+                    <div class="action-btn-label">睡觉</div>
+                    <div class="action-btn-cost">免费</div>
+                </button>
+            </div>
+
+            <div class="manage-buttons">
+                <button class="manage-btn" onclick="showPetSelect()">🔄 更换宠物</button>
+                <button class="manage-btn" onclick="toggleShop()">🛒 商店</button>
+            </div>
+
+            <div class="shop-card" id="shop-card" style="display: none;">
+                <div class="shop-title">
+                    <span>🛒 商店</span>
+                    <span style="font-size: 12px; color: #888;">点击购买使用</span>
+                </div>
+                <div class="shop-grid" id="shop-grid"></div>
+            </div>
+
+            <div class="tip-card">
+                <div class="tip-title">💡 小贴士</div>
+                <div id="pet-tip">每天打卡可以获得金币，用来照顾你的宠物哦！</div>
+            </div>
+
+            <div class="log-card">
+                <div class="log-title">📜 互动记录</div>
+                <div id="pet-logs"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 改名弹窗 -->
+    <div class="modal-overlay" id="rename-modal">
+        <div class="modal-box">
+            <div class="modal-title">给宠物起个名字</div>
+            <input type="text" class="modal-input" id="rename-input" placeholder="输入宠物名字" maxlength="10">
+            <div class="modal-btns">
+                <button class="modal-btn modal-btn-cancel" onclick="closeRenameModal()">取消</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmRename()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'healthReminder_v3';
+
+        const PET_CONFIG = {
+            dog: { emoji: '🐕', name: '小狗', names: ['旺财', '豆豆', '毛毛', '球球', '可乐'] },
+            cat: { emoji: '🐈', name: '小猫', names: ['咪咪', '橘子', '布丁', '汤圆', '奶茶'] },
+            horse: { emoji: '🐎', name: '小马', names: ['追风', '闪电', '踏雪', '疾风', '流星'] },
+            rabbit: { emoji: '🐇', name: '小兔子', names: ['小白', '棉花糖', '雪球', '兔兔', '糯米'] },
+            tiger: { emoji: '🐅', name: '小老虎', names: ['虎虎', '阿猛', '斑斑', '威威', '啸天'] }
+        };
+
+        const STAGE_EMOJI = {
+            1: '🥚', 2: '🥚', 3: '🥚', 4: '🥚',
+            5: '🌱', 6: '🌱', 7: '🌱', 8: '🌱', 9: '🌱',
+            10: '🌳', 11: '🌳', 12: '🌳', 13: '🌳', 14: '🌳',
+            15: '👑', 16: '👑', 17: '👑', 18: '👑', 19: '👑',
+            20: '🔥'
+        };
+
+        const ACTION_COST = { feed: 10, bath: 15, play: 20, sleep: 0 };
+        const ACTION_EFFECT = {
+            feed: { hunger: 30, hygiene: -5, mood: 10, energy: 5 },
+            bath: { hunger: -5, hygiene: 40, mood: 5, energy: -5 },
+            play: { hunger: -10, hygiene: -10, mood: 30, energy: -15 },
+            sleep: { hunger: -10, hygiene: 0, mood: 5, energy: 40 }
+        };
+
+        const SHOP_ITEMS = [
+            { id: 'food_premium', emoji: '🥩', name: '高级肉排', desc: '饱食度+60', price: 30, type: 'food', effect: { hunger: 60 } },
+            { id: 'food_fish', emoji: '🐟', name: '鲜鱼大餐', desc: '饱食度+50 心情+20', price: 35, type: 'food', effect: { hunger: 50, mood: 20 } },
+            { id: 'food_cake', emoji: '🍰', name: '宠物蛋糕', desc: '饱食度+40 心情+30', price: 40, type: 'food', effect: { hunger: 40, mood: 30 } },
+            { id: 'toy_ball', emoji: '⚽', name: '玩具球', desc: '心情+40 精力-10', price: 25, type: 'toy', effect: { mood: 40, energy: -10 } },
+            { id: 'toy_mouse', emoji: '🐁', name: '玩具老鼠', desc: '心情+50 精力-15', price: 30, type: 'toy', effect: { mood: 50, energy: -15 } },
+            { id: 'shampoo', emoji: '🧴', name: '高级香波', desc: '清洁度+60', price: 25, type: 'shampoo', effect: { hygiene: 60 } },
+            { id: 'pill_energy', emoji: '💊', name: '精力药丸', desc: '精力+50', price: 20, type: 'pill', effect: { energy: 50 } },
+            { id: 'medicine', emoji: '💉', name: '治疗针剂', desc: '治疗生病状态', price: 80, type: 'medicine', effect: { cureSick: true } },
+            { id: 'revive', emoji: '💗', name: '复活之心', desc: '复活已死亡的宠物', price: 200, type: 'revive' },
+            { id: 'card_checkin', emoji: '📅', name: '补签卡', desc: '补一次打卡记录', price: 100, type: 'card' }
+        ];
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : {};
+        }
+
+        function saveState(state) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function getCoins() {
+            const state = loadState();
+            return state.coins || 0;
+        }
+
+        function addCoins(amount) {
+            const state = loadState();
+            state.coins = (state.coins || 0) + amount;
+            saveState(state);
+            updateCoinDisplay();
+        }
+
+        function spendCoins(amount) {
+            const state = loadState();
+            if ((state.coins || 0) < amount) return false;
+            state.coins -= amount;
+            saveState(state);
+            updateCoinDisplay();
+            return true;
+        }
+
+        function updateCoinDisplay() {
+            document.getElementById('coin-count').textContent = getCoins();
+        }
+
+        function showPetSelect() {
+            document.getElementById('pet-empty').style.display = 'none';
+            document.getElementById('pet-select').style.display = 'block';
+            document.getElementById('pet-owned').style.display = 'none';
+        }
+
+        function adoptPet(type) {
+            const config = PET_CONFIG[type];
+            const randomName = config.names[Math.floor(Math.random() * config.names.length)];
+            const state = loadState();
+            const oldPet = state.pet;
+            const keepItems = oldPet ? (oldPet.inventory || []) : [];
+            const keepEquipped = oldPet ? (oldPet.equipped || {}) : {};
+
+            state.pet = {
+                type: type,
+                name: randomName,
+                level: 1,
+                exp: 0,
+                hunger: 80,
+                hygiene: 80,
+                mood: 80,
+                energy: 80,
+                adoptedAt: new Date().toISOString(),
+                logs: [{ time: new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'}), text: '领养了一只可爱的' + config.name + '！', coin: 0 }],
+                inventory: keepItems,
+                equipped: keepEquipped
+            };
+            saveState(state);
+            renderPet();
+        }
+
+        function getPetLevelInfo(level) {
+            if (level >= 20) return 'Lv.' + level + ' 传说神兽';
+            if (level >= 15) return 'Lv.' + level + ' 王者之姿';
+            if (level >= 10) return 'Lv.' + level + ' 成熟伙伴';
+            if (level >= 5) return 'Lv.' + level + ' 少年期';
+            return 'Lv.' + level + ' 幼年期';
+        }
+
+        function getStageForLevel(level) {
+            if (level >= 20) return 4;
+            if (level >= 15) return 3;
+            if (level >= 10) return 2;
+            if (level >= 5) return 1;
+            return 0;
+        }
+
+        function renderStageBadges(level) {
+            const currentStage = getStageForLevel(level);
+            const stages = ['🥚 幼年期', '🌱 少年期', '🌳 成熟期', '👑 王者期', '🔥 传说期'];
+            const container = document.getElementById('stage-badges');
+            container.innerHTML = stages.map((s, i) =>
+                `<span class="stage-badge ${i === currentStage ? 'stage-active' : 'stage-inactive'}">${s}</span>`
+            ).join('');
+        }
+
+        function checkPetHealth(pet) {
+            if (pet.status === 'dead') return;
+
+            // Check for death condition
+            if (pet.hunger <= 0 || pet.hygiene <= 0) {
+                pet.status = 'dead';
+                pet.deadAt = new Date().toISOString();
+                const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+                pet.logs.push({ time: time, text: '⚠️ ' + pet.name + ' 不幸去世了... 请购买复活之心让它重生', coin: 0 });
+                return;
+            }
+
+            // Check for sickness
+            const lowStats = (pet.hunger < 30 ? 1 : 0) + (pet.hygiene < 30 ? 1 : 0) + (pet.mood < 30 ? 1 : 0);
+            if (lowStats >= 2 && pet.status !== 'sick') {
+                pet.status = 'sick';
+                const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+                pet.logs.push({ time: time, text: '😷 ' + pet.name + ' 生病了！请使用治疗针剂', coin: 0 });
+            } else if (lowStats < 2 && pet.status === 'sick') {
+                pet.status = 'healthy';
+                const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+                pet.logs.push({ time: time, text: '✨ ' + pet.name + ' 恢复健康了！', coin: 0 });
+            }
+        }
+
+        function renderPet() {
+            const state = loadState();
+            const pet = state.pet;
+
+            if (!pet) {
+                document.getElementById('pet-empty').style.display = 'block';
+                document.getElementById('pet-select').style.display = 'none';
+                document.getElementById('pet-owned').style.display = 'none';
+                updateCoinDisplay();
+                return;
+            }
+
+            document.getElementById('pet-empty').style.display = 'none';
+            document.getElementById('pet-select').style.display = 'none';
+            document.getElementById('pet-owned').style.display = 'block';
+
+            const config = PET_CONFIG[pet.type];
+            const emojiEl = document.getElementById('pet-emoji');
+            emojiEl.textContent = config.emoji;
+
+            const sceneEl = document.querySelector('.pet-scene');
+            sceneEl.classList.remove('sick', 'dead');
+
+            const statusTagEl = document.getElementById('pet-status-tag');
+            statusTagEl.innerHTML = '';
+
+            if (pet.status === 'dead') {
+                emojiEl.className = 'pet-emoji pet-dead';
+                sceneEl.classList.add('dead');
+                statusTagEl.innerHTML = '<span class="pet-status-tag tag-dead">💀 已死亡</span>';
+            } else if (pet.status === 'sick') {
+                emojiEl.className = 'pet-emoji pet-sick';
+                sceneEl.classList.add('sick');
+                statusTagEl.innerHTML = '<span class="pet-status-tag tag-sick">😷 生病中</span>';
+            } else {
+                // Apply pet type class for unique animation
+                emojiEl.className = 'pet-emoji pet-' + pet.type;
+
+                // Apply state-based classes
+                if (pet.hunger < 30) emojiEl.classList.add('pet-hungry');
+                else if (pet.mood < 30) emojiEl.classList.add('pet-sad');
+                else if (pet.energy < 20) emojiEl.classList.add('pet-sleepy');
+            }
+
+            document.getElementById('pet-name').textContent = pet.name;
+            document.getElementById('pet-level').textContent = getPetLevelInfo(pet.level);
+
+            renderStageBadges(pet.level);
+            renderAccessories();
+
+            document.getElementById('hunger-val').textContent = Math.round(pet.hunger) + '%';
+            document.getElementById('hunger-bar').style.width = pet.hunger + '%';
+            document.getElementById('hygiene-val').textContent = Math.round(pet.hygiene) + '%';
+            document.getElementById('hygiene-bar').style.width = pet.hygiene + '%';
+            document.getElementById('mood-val').textContent = Math.round(pet.mood) + '%';
+            document.getElementById('mood-bar').style.width = pet.mood + '%';
+            document.getElementById('energy-val').textContent = Math.round(pet.energy) + '%';
+            document.getElementById('energy-bar').style.width = pet.energy + '%';
+
+            // Disable buttons if pet is dead
+            const isDead = pet.status === 'dead';
+            const isSick = pet.status === 'sick';
+            const coins = getCoins();
+
+            document.getElementById('btn-feed').disabled = isDead || coins < ACTION_COST.feed;
+            document.getElementById('btn-bath').disabled = isDead || coins < ACTION_COST.bath;
+            document.getElementById('btn-play').disabled = isDead || coins < ACTION_COST.play || pet.energy < 20;
+            document.getElementById('btn-sleep').disabled = isDead || pet.energy >= 100;
+
+            const logsContainer = document.getElementById('pet-logs');
+            if (pet.logs && pet.logs.length > 0) {
+                logsContainer.innerHTML = pet.logs.slice(-10).reverse().map(log => `
+                    <div class="log-item">
+                        <span class="log-time">${log.time}</span>
+                        <span class="log-text">${log.text}</span>
+                        ${log.coin > 0 ? '<span class="log-coin">+' + log.coin + '🪙</span>' : ''}
+                        ${log.coin < 0 ? '<span class="log-coin">' + log.coin + '🪙</span>' : ''}
+                    </div>
+                `).join('');
+            } else {
+                logsContainer.innerHTML = '<div class="log-item"><span class="log-text">暂无记录</span></div>';
+            }
+
+            let tips = [
+                '每天打卡可以获得金币，用来照顾你的宠物哦！',
+                '记得定时喂食，宠物饿肚子会不开心的~',
+                '给宠物洗澡可以提升清洁度，让它更健康！',
+                '陪宠物玩耍可以提升心情，但要消耗精力哦~',
+                '让宠物睡觉可以恢复精力，而且是免费的！',
+                '宠物等级越高，解锁的新功能越多！',
+                '去商店买特殊道具，可以快速恢复宠物状态！'
+            ];
+            if (isSick) {
+                tips = ['😷 宠物生病了！快去商店买治疗针剂！', '生病时宠物无法获得经验，请及时治疗！'];
+            } else if (isDead) {
+                tips = ['💀 宠物已死亡... 请去商店购买复活之心让它重生', '复活后宠物等级保留，但状态会重置'];
+            }
+            document.getElementById('pet-tip').textContent = tips[Math.floor(Math.random() * tips.length)];
+
+            updateCoinDisplay();
+        }
+
+        function renderAccessories() {
+            // Accessories removed - now using consumable items instead
+            const container = document.getElementById('pet-accessories');
+            if (container) container.innerHTML = '';
+        }
+
+        function interact(action) {
+            const state = loadState();
+            const pet = state.pet;
+            if (!pet) return;
+
+            if (pet.status === 'dead') {
+                alert('宠物已死亡，请先购买复活之心！');
+                return;
+            }
+
+            const cost = ACTION_COST[action];
+            if (cost > 0 && !spendCoins(cost)) {
+                alert('金币不足，快去打卡赚取金币吧！');
+                return;
+            }
+
+            const effect = ACTION_EFFECT[action];
+            pet.hunger = Math.max(0, Math.min(100, pet.hunger + effect.hunger));
+            pet.hygiene = Math.max(0, Math.min(100, pet.hygiene + effect.hygiene));
+            pet.mood = Math.max(0, Math.min(100, pet.mood + effect.mood));
+            pet.energy = Math.max(0, Math.min(100, pet.energy + effect.energy));
+
+            // Check health after interaction
+            checkPetHealth(pet);
+
+            // No exp when sick
+            if (pet.status !== 'sick' && pet.status !== 'dead') {
+                pet.exp = (pet.exp || 0) + 10;
+                const oldLevel = pet.level;
+                if (pet.exp >= pet.level * 50) {
+                    pet.exp = 0;
+                    pet.level = (pet.level || 1) + 1;
+                }
+            }
+
+            const actionNames = { feed: '喂食', bath: '洗澡', play: '玩耍', sleep: '睡觉' };
+            const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+            pet.logs = pet.logs || [];
+            let logText = '你给' + pet.name + actionNames[action] + '了';
+            if (pet.level > (pet.level || 1)) {
+                logText += '，升级到了 Lv.' + pet.level + '！';
+            }
+            pet.logs.push({ time: time, text: logText, coin: -cost });
+
+            saveState(state);
+            renderPet();
+
+            // Trigger interaction animation
+            const emojiEl = document.getElementById('pet-emoji');
+            const animClass = action === 'feed' ? 'pet-eating' : action === 'bath' ? 'pet-bathing' : action === 'play' ? 'pet-playing' : 'pet-sleeping';
+            emojiEl.classList.add(animClass);
+            setTimeout(() => emojiEl.classList.remove(animClass), 1000);
+
+            // Level up animation
+            if (pet.level > oldLevel) {
+                setTimeout(() => {
+                    emojiEl.classList.add('pet-levelup');
+                    setTimeout(() => emojiEl.classList.remove('pet-levelup'), 1000);
+                }, 500);
+            }
+
+            // Show floating particles
+            const container = document.getElementById('pet-container');
+            const particles = action === 'feed' ? ['🍖', '✨', '😋'] : action === 'bath' ? ['🫧', '💧', '✨'] : action === 'play' ? ['❤️', '⭐', '🎾'] : ['💤', '🌙', '✨'];
+            particles.forEach((p, i) => {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'pet-particle';
+                    particle.textContent = p;
+                    particle.style.left = (30 + Math.random() * 80) + 'px';
+                    particle.style.top = (20 + Math.random() * 40) + 'px';
+                    container.appendChild(particle);
+                    setTimeout(() => particle.remove(), 1200);
+                }, i * 150);
+            });
+
+            // Show heart
+            const heart = document.createElement('div');
+            heart.className = 'pet-hearts';
+            heart.textContent = action === 'feed' ? '🍖' : action === 'bath' ? '🫧' : action === 'play' ? '❤️' : '💤';
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), 1500);
+        }
+
+        function decayPetStats() {
+            const state = loadState();
+            const pet = state.pet;
+            if (!pet) return;
+
+            const lastUpdate = new Date(pet.lastUpdate || pet.adoptedAt);
+            const now = new Date();
+            const hoursPassed = (now - lastUpdate) / (1000 * 60 * 60);
+
+            if (hoursPassed >= 1) {
+                pet.hunger = Math.max(0, pet.hunger - hoursPassed * 2);
+                pet.hygiene = Math.max(0, pet.hygiene - hoursPassed * 1.5);
+                pet.mood = Math.max(0, pet.mood - hoursPassed * 1);
+                pet.energy = Math.min(100, pet.energy + hoursPassed * 3);
+                pet.lastUpdate = now.toISOString();
+
+                checkPetHealth(pet);
+                saveState(state);
+                renderPet();
+            }
+        }
+
+        // Rename
+        function showRenameModal() {
+            const state = loadState();
+            document.getElementById('rename-input').value = state.pet?.name || '';
+            document.getElementById('rename-modal').classList.add('active');
+        }
+        function closeRenameModal() {
+            document.getElementById('rename-modal').classList.remove('active');
+        }
+        function confirmRename() {
+            const name = document.getElementById('rename-input').value.trim();
+            if (!name) { closeRenameModal(); return; }
+            const state = loadState();
+            if (state.pet) {
+                state.pet.name = name;
+                saveState(state);
+                renderPet();
+            }
+            closeRenameModal();
+        }
+
+        // Shop
+        function toggleShop() {
+            const shop = document.getElementById('shop-card');
+            if (shop.style.display === 'none') {
+                shop.style.display = 'block';
+                renderShop();
+            } else {
+                shop.style.display = 'none';
+            }
+        }
+
+        function renderShop() {
+            const state = loadState();
+            const pet = state.pet;
+            const inventory = pet?.inventory || {};
+            const grid = document.getElementById('shop-grid');
+
+            grid.innerHTML = SHOP_ITEMS.map(item => {
+                const count = inventory[item.id] || 0;
+
+                return `
+                    <div class="shop-item" onclick="handleShopItem('${item.id}')">
+                        ${count > 0 ? '<span class="shop-item-count">x' + count + '</span>' : ''}
+                        <div class="shop-item-emoji">${item.emoji}</div>
+                        <div class="shop-item-info">
+                            <div class="shop-item-name">${item.name}</div>
+                            <div class="shop-item-desc">${item.desc}</div>
+                            <div class="shop-item-price">${item.price}🪙</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleShopItem(itemId) {
+            const state = loadState();
+            const pet = state.pet;
+            if (!pet) return;
+            pet.inventory = pet.inventory || {};
+
+            const item = SHOP_ITEMS.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (item.type === 'card') {
+                if (spendCoins(item.price)) {
+                    pet.inventory[itemId] = (pet.inventory[itemId] || 0) + 1;
+                    const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+                    pet.logs.push({ time: time, text: '购买了 ' + item.name, coin: -item.price });
+                    saveState(state);
+                    renderShop();
+                    renderPet();
+                    alert('补签卡购买成功！请到打卡页面使用。');
+                } else {
+                    alert('金币不足！');
+                }
+                return;
+            }
+
+            if (item.type === 'revive') {
+                if (pet.status !== 'dead') {
+                    alert('宠物还活着，不需要复活！');
+                    return;
+                }
+                if (spendCoins(item.price)) {
+                    pet.status = 'healthy';
+                    pet.hunger = 60;
+                    pet.hygiene = 60;
+                    pet.mood = 60;
+                    pet.energy = 60;
+                    const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+                    pet.logs.push({ time: time, text: '💗 ' + pet.name + ' 复活了！感谢你的不离不弃', coin: -item.price });
+                    saveState(state);
+                    renderPet();
+                    renderShop();
+
+                    const emojiEl = document.getElementById('pet-emoji');
+                    emojiEl.classList.add('pet-levelup');
+                    setTimeout(() => emojiEl.classList.remove('pet-levelup'), 1000);
+                } else {
+                    alert('金币不足！');
+                }
+                return;
+            }
+
+            if (item.type === 'medicine') {
+                if (pet.status !== 'sick') {
+                    alert('宠物没有生病，不需要治疗！');
+                    return;
+                }
+                if (spendCoins(item.price)) {
+                    pet.status = 'healthy';
+                    pet.mood = Math.min(100, pet.mood + 20);
+                    const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+                    pet.logs.push({ time: time, text: '💉 ' + pet.name + ' 使用了治疗针剂，恢复健康！', coin: -item.price });
+                    saveState(state);
+                    renderPet();
+                    renderShop();
+
+                    const emojiEl = document.getElementById('pet-emoji');
+                    emojiEl.classList.add('pet-happy');
+                    setTimeout(() => emojiEl.classList.remove('pet-happy'), 1000);
+                } else {
+                    alert('金币不足！');
+                }
+                return;
+            }
+
+            // For consumable items - buy and use immediately
+            if (pet.status === 'dead') {
+                alert('宠物已死亡，请先购买复活之心！');
+                return;
+            }
+
+            if (spendCoins(item.price)) {
+                if (item.effect) {
+                    if (item.effect.hunger) pet.hunger = Math.max(0, Math.min(100, pet.hunger + item.effect.hunger));
+                    if (item.effect.hygiene) pet.hygiene = Math.max(0, Math.min(100, pet.hygiene + item.effect.hygiene));
+                    if (item.effect.mood) pet.mood = Math.max(0, Math.min(100, pet.mood + item.effect.mood));
+                    if (item.effect.energy) pet.energy = Math.max(0, Math.min(100, pet.energy + item.effect.energy));
+                }
+
+                checkPetHealth(pet);
+
+                if (pet.status !== 'sick' && pet.status !== 'dead') {
+                    pet.exp = (pet.exp || 0) + 5;
+                    if (pet.exp >= pet.level * 50) {
+                        pet.exp = 0;
+                        pet.level = (pet.level || 1) + 1;
+                    }
+                }
+
+                const time = new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+                pet.logs = pet.logs || [];
+                pet.logs.push({ time: time, text: '使用了 ' + item.name, coin: -item.price });
+
+                saveState(state);
+                renderPet();
+                renderShop();
+
+                const emojiEl = document.getElementById('pet-emoji');
+                emojiEl.classList.add('pet-eating');
+                setTimeout(() => emojiEl.classList.remove('pet-eating'), 1000);
+
+                const container = document.getElementById('pet-container');
+                const particles = [item.emoji, '✨', '💖'];
+                particles.forEach((p, i) => {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'pet-particle';
+                        particle.textContent = p;
+                        particle.style.left = (30 + Math.random() * 80) + 'px';
+                        particle.style.top = (20 + Math.random() * 40) + 'px';
+                        container.appendChild(particle);
+                        setTimeout(() => particle.remove(), 1200);
+                    }, i * 150);
+                });
+            } else {
+                alert('金币不足！');
+            }
+        }
+
+        // Initialize
+        updateCoinDisplay();
+        decayPetStats();
+        renderPet();
+    </script>
+</body>
+</html>
